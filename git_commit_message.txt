@@ -1,0 +1,22 @@
+### 제목(영어, 앞글자 대문자)
+# [커밋 타입]: 작업 내용
+
+
+### 본문
+# (1)무엇(code)을 (2)왜 (3) 어떻게 수정했는지
+
+
+### 꼬리말
+# (선택)이슈 등 아래 작성
+ 
+###[커밋 태그]
+#FEAT: 기능을 추가 또는 수정
+#ENV: 개발 환경을 추가 또는 수정 (eslint 변경, dockerfile 변경 등)
+#FIX: 버그를 해결
+#DOCS: 문서를 수정 (README.md 변경, swagger)
+#STYLE: 코드 스타일 변경 (prettier, npm run lint 등)
+#REFACT: 코드를 리팩토링, 기능은 같고 코드가 변경
+#TEST: 테스트 코드를 추가 또는 수정
+#MERGE: 풀 리퀘스트 머지할 경우
+#CHORE: 단순오타
+#WIP: working in process 아직 작업중인 내용 
