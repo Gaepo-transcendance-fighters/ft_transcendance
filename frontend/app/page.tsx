@@ -1,3 +1,9 @@
+import Box from "@/components/public/Box";
+
 export default function Home() {
-  return <p>main</p>;
+  return (
+    <>
+      <Box></Box>
+    </>
+  );
 }
