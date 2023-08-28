@@ -1,17 +1,23 @@
-# # syntax=docker/dockerfile:1
+FROM debian:bullseye
 
-# FROM node:14
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y && \
+    apt-get install -y build-essential && \
+    apt-get install -y curl && \
+    curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+    apt install -y vim && \
+    apt-get install -y nodejs && \
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash && \
+    npm install -g n && \
+    n latest
 
-# WORKDIR /app
+COPY frontend_server /app/frontend_server
 
-# COPY package*.json ./
+WORKDIR /app/frontend_server
 
-# # 의존성 설치
-# RUN npm install
+RUN npm install
 
-# COPY . .
+EXPOSE 3000
 
-# EXPOSE 4000
-
-# # 앱 시작 시 실행할 명령어
-# CMD ["npm", "run", "dev"]
+CMD [ "npm", "run", "dev" ]
