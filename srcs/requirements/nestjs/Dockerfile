@@ -18,4 +18,6 @@ RUN chmod +x ./database.sh
 RUN npm i --save @nestjs/websockets @nestjs/platform-socket.io && \
     npm install
 
+EXPOSE 4000
+
 ENTRYPOINT [ "./database.sh" ]
