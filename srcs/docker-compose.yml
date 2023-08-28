@@ -1,0 +1,74 @@
+# version: "3.8"
+
+# services:
+#     # nginx:
+#     #   build: requirements/nginx
+#     #   image: nginx:latest
+#     #   container_name: nginx
+#     #   ports:
+#     #     - 443:443
+#     #   restart: always
+#     #   depends_on:
+#     #     - nestjs
+#     #     - nextjs
+#     #   networks:
+#     #     - transcendance_network
+
+#     nestjs:
+#         build: ./requirements/nestjs
+#         ports:
+#             - "4000:4000"
+#         networks:
+#             - transcendance_network
+#         # env_file:
+#         #   - .env
+#         # depends_on:
+#         #     - postgresql
+
+#     # nextjs:
+#     #   build: requirements/nextjs
+#     #   image: node:latest
+#     #   container_name: nextjs
+#     #   restart: always
+#     #   volumes:
+#     #     - ./requirements/nextjs:/app
+#     #   expose:
+#     #     - "3000:3000"
+#     #   depends_on:
+#     #     - nestjs
+#     #   networks:
+#     #     - transcendance_network
+#     #   # env_file:
+#     #   #   - .env
+
+#     # postgresql:
+#     #   # init: true
+#     #   build: ./requirements/postgresql/
+#     #   image: postgres:latest
+#     #   container_name: postgresql
+#     #   # restart: always
+#     #   expose:
+#     #     - "5432:5432"
+#     #   networks:
+#     #     - transcendance_network
+#     #   # env_file:
+#     #   #   - .env
+
+# networks:
+#     transcendance_network:
+#         name: transcendance_network
+# # volumes:
+# #   wp_volume:
+# #      name: wp_volume
+# #      driver: local
+# #      driver_opts:
+# #        type: none
+# #        device: /home/jaekim/data/wordpress
+# #        o: bind
+# #   db_volume:
+# #      name: db_volume
+# #      driver: local
+# #      driver_opts:
+# #        type: none
+# #        device: /home/jaekim/data/mariadb
+# #        o: bind
