@@ -1,4 +1,4 @@
-IMAGE_NAME = nestjs
+IMAGE_NAME = nextjs
 
 all:	build run
 
@@ -9,7 +9,7 @@ build:
 	@sudo docker build -t $(IMAGE_NAME) .
 
 run:
-	@sudo docker run -it -p 3000:3000 $(IMAGE_NAME)
+	@sudo docker run -it -p 3000:3000 --name $(IMAGE_NAME) $(IMAGE_NAME)
 
 # re:	clean all
 
