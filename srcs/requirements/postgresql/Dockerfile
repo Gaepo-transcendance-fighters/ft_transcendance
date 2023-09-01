@@ -1,8 +1,14 @@
-# # PostgreSQL Dockerfile
-# FROM postgres:latest
+FROM debian:bullseye
 
-# ENV POSTGRES_DB mydatabase
-# ENV POSTGRES_USER postgres
-# ENV POSTGRES_PASSWORD postgres
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y && \
+    apt-get install -y dumb-init && \
+    apt install -y postgresql-13
 
-# EXPOSE 5432
+COPY . .
+
+RUN chmod +x ./database.sh
+
+# ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["/database.sh"]

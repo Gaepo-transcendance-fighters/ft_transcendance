@@ -1,12 +1,23 @@
 version: "3.8"
 
 services:
+    postgresql:
+        build: requirements/postgresql/
+        container_name: postgresql
+        restart: always
+        expose:
+            - "5432"
+        networks:
+            - transcendance_network
+
     nestjs:
         build: requirements/nestjs
         container_name: nestjs
         restart: always
         ports:
             - "4000:4000"
+        depends_on:
+            - postgresql
         networks:
             - transcendance_network
 
