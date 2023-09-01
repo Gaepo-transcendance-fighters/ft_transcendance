@@ -10,23 +10,23 @@ NAME = Transcendance
 # all: fclean up
 
 up:
-	@sudo docker-compose -f ./srcs/docker-compose.yml up --build -d;
+	@docker-compose -f ./srcs/docker-compose.yml up --build -d;
 	@echo "$(GRN)>>> docker compose up$(DFT)"
 
 down:
-	@sudo docker-compose -f ./srcs/docker-compose.yml down;
+	@docker-compose -f ./srcs/docker-compose.yml down;
 	@echo "$(YLW)>>> docker compose down$(DFT)"
 
 image:
-	@sudo docker pull debian:bullseye
+	@docker pull debian:bullseye
 
 # clean: 
-# 	@sudo docker-compose -f ./srcs/docker-compose.yml down --rmi all --volumes
+# 	@docker-compose -f ./srcs/docker-compose.yml down --rmi all --volumes
 # 	@echo "$(RED)>>> docker stop and remove volume, networks and caches$(DFT)"
 
 # fclean: clean
-# 	@sudo rm -rf $(VOLUME_PATH)/mariadb
-# 	@sudo rm -rf $(VOLUME_PATH)/wordpress
+# 	@rm -rf $(VOLUME_PATH)/mariadb
+# 	@rm -rf $(VOLUME_PATH)/wordpress
 # 	@echo "$(RED)>>> remove your volume files$(DFT)"
 # # remove files from the volumes (you need to fill it)
 
