@@ -5,15 +5,12 @@ services:
         build: requirements/postgresql/
         container_name: postgresql
         restart: always
-        expose:
-            - "5432"
         networks:
             - transcendance_network
 
     nestjs:
         build: requirements/nestjs
         container_name: nestjs
-        restart: always
         ports:
             - "4000:4000"
         depends_on:
@@ -24,7 +21,6 @@ services:
     nextjs:
         build: requirements/nextjs
         container_name: nextjs
-        restart: always
         ports:
             - "3000:3000"
         depends_on:
@@ -35,3 +31,4 @@ services:
 networks:
     transcendance_network:
         name: transcendance_network
+        driver: bridge

@@ -20,6 +20,8 @@ down:
 image:
 	@sudo docker pull debian:bullseye
 
+clean:
+	@docker system prune -af
 # clean: 
 # 	@sudo docker-compose -f ./srcs/docker-compose.yml down --rmi all --volumes
 # 	@echo "$(RED)>>> docker stop and remove volume, networks and caches$(DFT)"
