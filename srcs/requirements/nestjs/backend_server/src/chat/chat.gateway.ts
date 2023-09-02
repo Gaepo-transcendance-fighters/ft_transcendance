@@ -64,7 +64,10 @@ export class ChatGateway
   }
 
   async handleConnection(client: Socket) {
+    console.log('@@@@@@', client.handshake.query.userId);
     const userId: number = parseInt(client.handshake.query.userId as string);
+    if (Number.isNaN(userId)) return;
+
     // FIXME: 함수로 빼기
     const user = await this.inMemoryUsers.getUserByIdFromIM(userId);
     if (!user) {
@@ -91,7 +94,9 @@ export class ChatGateway
   }
 
   async handleDisconnect(client: Socket) {
+    console.log('!!!!', client.handshake.query.userId);
     const userId: number = parseInt(client.handshake.query.userId as string);
+
     // FIXME: 함수로 빼기
     const user = this.inMemoryUsers.getUserByIdFromIM(userId);
     if (!user) {
@@ -263,30 +268,30 @@ export class ChatGateway
     );
   }
 
-  // API: MAIN_CHAT_0
-  @SubscribeMessage('check_dm')
-  async handleCheckDM(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() chatGeneralReqDto: ChatGeneralReqDto,
-  ) {
-    const { targetIdx } = chatGeneralReqDto;
-    const userId: number = parseInt(client.handshake.query.userId as string);
-    const check_dm: MessageInfo | boolean = await this.chatService.checkDM(
-      userId,
-      targetIdx,
-    );
-    if (check_dm === false) {
-      client.emit('check_dm', []);
-      return false;
-    } else {
-      client.emit('check_dm', check_dm);
-    }
-    return this.messanger.setResponseMsgWithLogger(
-      200,
-      'Done Check DM',
-      'check_dm',
-    );
-  }
+  // // API: MAIN_CHAT_0
+  // @SubscribeMessage('check_dm')
+  // async handleCheckDM(
+  //   @ConnectedSocket() client: Socket,
+  //   @MessageBody() chatGeneralReqDto: ChatGeneralReqDto,
+  // ) {
+  //   const { targetIdx } = chatGeneralReqDto;
+  //   const userId: number = parseInt(client.handshake.query.userId as string);
+  //   const check_dm: MessageInfo | boolean = await this.chatService.checkDM(
+  //     userId,
+  //     targetIdx,
+  //   );
+  //   if (check_dm === false) {
+  //     client.emit('check_dm', []);
+  //     return false;
+  //   } else {
+  //     client.emit('check_dm', check_dm);
+  //   }
+  //   return this.messanger.setResponseMsgWithLogger(
+  //     200,
+  //     'Done Check DM',
+  //     'check_dm',
+  //   );
+  // }
 
   // API: MAIN_CHAT_1.
   @SubscribeMessage('create_dm')
@@ -328,9 +333,10 @@ export class ChatGateway
         'create_dm',
       );
     }
+    // TODO: 이게 필요한가?
     if (await this.chatService.checkDM(user.userIdx, targetUser.userIdx)) {
       return this.messanger.setResponseErrorMsgWithLogger(
-        400,
+        300,
         'Already Exist',
         'create_dm',
       );
@@ -342,24 +348,21 @@ export class ChatGateway
       this.inMemoryUsers,
       targetUser,
     );
-    const newChannelAndMsg = await this.chatService.createDM(
+    const newChannel = await this.chatService.createDM(
       client,
       user,
       targetUser,
       message,
       checkBlock,
     );
-    if (!newChannelAndMsg) {
+    if (!newChannel) {
       return this.messanger.setResponseErrorMsgWithLogger(
         400,
         'Fail to Create DM',
         'create_dm',
       );
     }
-    this.server
-      .to(`chat_room_${newChannelAndMsg.channelIdx}`)
-      .emit('create_dm', newChannelAndMsg);
-    //
+    client.emit('create_dm', newChannel);
     return this.messanger.setResponseMsgWithLogger(
       200,
       'Done Create DM',

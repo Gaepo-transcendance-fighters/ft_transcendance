@@ -2,62 +2,123 @@
 
 import { Box, Button } from "@mui/material";
 import { useState, useCallback, useEffect, useRef } from "react";
-import FormControl, { useFormControl } from "@mui/material/FormControl";
+import FormControl from "@mui/material/FormControl";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import { io } from "socket.io-client";
 import { socket } from "@/app/page";
 import { Dispatch } from "react";
 import { SetStateAction } from "react";
 import { useRoom } from "@/context/RoomContext";
+import { IChat } from "@/type/type";
+import { useUser } from "@/context/UserContext";
 import { useAuth } from "@/context/AuthContext";
-
-const userId = 7;
-interface IChat {
-  channelIdx: number;
+interface IPayload {
+  channelIdx: number | undefined;
   senderIdx: number;
   msg: string;
-  msgDate: Date;
+  targetIdx?: number | null;
 }
+
 interface Props {
   setMsgs: Dispatch<SetStateAction<IChat[]>>;
 }
-// setMsgs: Dispatch<SetStateAction<IChat[]>>
 const BottomField = ({ setMsgs }: Props) => {
   const [msg, setMsg] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
   const { roomState } = useRoom();
+  const { userState } = useUser();
+  const { authState } = useAuth();
 
   const changeMsg = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMsg(event.target.value);
   };
 
   useEffect(() => {
-    const messageHandler = (chat: IChat) => {
-      console.log("chat", chat);
-      setMsgs((prevChats: any) => [...prevChats, chat]);
-      setMsg("");
+    const messageHandler = (chatFromServer: IChat) => {
+      let result;
+      if (roomState.currentRoom?.mode === "private") {
+        if (
+          roomState.currentDmRoomMemberList?.userIdx1 ===
+          chatFromServer.senderIdx
+        ) {
+          result = roomState.currentDmRoomMemberList?.userNickname1;
+        } else if (
+          roomState.currentDmRoomMemberList?.userIdx2 ===
+          chatFromServer.senderIdx
+        ) {
+          result = roomState.currentDmRoomMemberList?.userNickname2;
+        } else return;
+        const chat = {
+          channelIdx: chatFromServer.channelIdx,
+          senderIdx:
+            chatFromServer.sender ===
+            roomState.currentDmRoomMemberList?.userIdx1
+              ? roomState.currentDmRoomMemberList?.userIdx1
+              : roomState.currentDmRoomMemberList?.userIdx2,
+          sender: result,
+          msg: chatFromServer.msg,
+          msgDate: chatFromServer.msgDate,
+        };
+        setMsgs((prevChats: IChat[]) => [chat, ...prevChats]);
+        console.log(chat);
+      } else {
+        result = roomState.currentRoomMemberList.find(
+          (person) => person.userIdx === chatFromServer.senderIdx
+        );
+        if (result?.nickname) {
+          const chat = {
+            channelIdx: chatFromServer.channelIdx,
+            senderIdx: chatFromServer.senderIdx,
+            sender: result?.nickname,
+            msg: chatFromServer.msg,
+            msgDate: chatFromServer.msgDate,
+          };
+          setMsgs((prevChats: IChat[]) => [chat, ...prevChats]);
+        } else {
+          console.log("[ERROR] there aren't nickname from data");
+        }
+      }
     };
     socket.on("chat_send_msg", messageHandler);
-
+    
     return () => {
       socket.off("chat_send_msg", messageHandler);
     };
-  }, []);
-
+  }, [roomState.currentRoomMemberList, roomState.currentDmRoomMemberList]);
+  
   useEffect(() => {
     inputRef.current?.focus();
-  });
-
+  }, []);
+  
   const onSubmit = useCallback(
     (event: React.FormEvent) => {
       event.preventDefault();
-      const payload = {
-        channelIdx: roomState.currentRoom?.channelIdx,
-        senderIdx: 98364,
-        msg: msg,
-      };
-      console.log("payload", payload);
-      socket.emit("chat_send_msg", JSON.stringify(payload));
+      let payload: IPayload | undefined = undefined;
+      if (
+        roomState.currentRoom?.mode === "private" &&
+        roomState.currentDmRoomMemberList?.userIdx1 &&
+        roomState.currentDmRoomMemberList?.userIdx2
+        ) {
+          payload = {
+            channelIdx: roomState.currentRoom?.channelIdx,
+            senderIdx: userState.userIdx,
+            msg: msg,
+            targetIdx:
+            userState.userIdx === roomState.currentDmRoomMemberList?.userIdx1
+            ? roomState.currentDmRoomMemberList?.userIdx2
+            : roomState.currentDmRoomMemberList?.userIdx1,
+          };
+        } else if (
+          roomState.currentRoom?.mode === "public" ||
+          roomState.currentRoom?.mode === "protected"
+          ) {
+            payload = {
+              channelIdx: roomState.currentRoom?.channelIdx,
+              senderIdx: userState.userIdx,
+              msg: msg,
+        };
+      }
+      socket.emit("chat_send_msg", payload);
+      setMsg("");
       inputRef.current?.focus();
     },
     [msg]
@@ -106,7 +167,6 @@ const BottomField = ({ setMsgs }: Props) => {
           </FormControl>
         </Box>
         <Button
-          // type="submit"
           style={{
             width: "8.5vw",
             justifyContent: "center",

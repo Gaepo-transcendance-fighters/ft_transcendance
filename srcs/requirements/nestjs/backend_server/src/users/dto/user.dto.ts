@@ -12,7 +12,7 @@ export class UserDto {
 export class UserEditprofileDto {
   userIdx : number;
   userNickname: string;
-  imgData: any
+  imgData: any;
 }
 
 // export class UserEditImgDto {
@@ -29,7 +29,6 @@ export class IntraInfoDto {
     this.token = token;
     this.email = email;
     this.check2Auth = check2Auth;
-
   }
   userIdx: number;
   intra: string;

@@ -1,88 +1,101 @@
 "use client";
-import { ThemeProvider } from "@emotion/react";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Stack,
-  Modal,
-  createTheme,
-  Typography,
-} from "@mui/material";
+
+import { Button, Card, CardContent, Stack, Typography } from "@mui/material";
 
 import { useRouter } from "next/navigation";
 import { main } from "@/type/type";
 import { useEffect, useState } from "react";
 import PingPong from "@/components/game/ingame/PingPong";
-import { resetGameContextData, useGame } from "@/context/GameContext";
-
-const font = createTheme({
-  typography: {
-    fontFamily: "neodgm",
-  },
-});
-const modalStyle = {
-  position: "absolute" as "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 300,
-  height: 150,
-  bgcolor: "#65d9f9",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-};
+import { useGame } from "@/context/GameContext";
+import useModal from "@/hooks/useModal";
+import Modals from "@/components/public/Modals";
+import { gameSocket } from "../page";
 
 const GamePlaying = () => {
   const router = useRouter();
-  const { state, dispatch } = useGame();
+  const [client, setClient] = useState<boolean>(false);
+  const { gameState, gameDispatch } = useGame();
+  const { isShowing, toggle } = useModal();
+  const { isShowing: isShowing2, toggle: toggle2 } = useModal();
   const [openModal, setOpenModal] = useState<boolean>(false);
 
-  const ClickNomalGame = () => {
-    router.push("./optionselect");
-  };
-
-  const BackToMain = () => {
-    router.push("/");
-    dispatch({ type: "SCORE_RESET", value: resetGameContextData() });
-  };
-
-  const handleOpenModal_redir = () => {
-    setOpenModal(true);
-    setTimeout(() => {
-      router.push("./gameresult");
-    }, 2000);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
+  const backToMain = () => {
+    gameDispatch({ type: "SCORE_RESET" });
+    gameSocket.emit("game_queue_quit", gameState.aPlayer.id);
+    gameSocket.disconnect();
+    router.replace("/");
   };
 
   useEffect(() => {
-    dispatch({ type: "SCORE_RESET", value: resetGameContextData() });
+    setClient(true);
+    const preventGoBack = (e: PopStateEvent) => {
+      e.preventDefault();
+      toggle();
+    };
+
+    const preventRefresh = (e: KeyboardEvent) => {
+      e.preventDefault();
+      if (
+        e.key === "F5" ||
+        ((e.ctrlKey === true || e.metaKey === true) && e.key === "r")
+      ) {
+        console.log("새로고침");
+        toggle2();
+        return false;
+      }
+    };
+
+    const preventRefreshButton = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+      router.replace("/?from=game");
+    };
+
+    history.pushState(null, "", location.href);
+    addEventListener("popstate", preventGoBack);
+    addEventListener("keydown", preventRefresh);
+    addEventListener("beforeunload", preventRefreshButton);
+
+    //탈주시
+    // gameSocket.on("game_queue_quit", (res: number) => {
+    //   console.log("상대가 나감", res);
+    //   gameDispatch({ type: "A_SCORE", value: 5 });
+    //   gameDispatch({ type: "B_SCORE", value: 0 });
+    //   gameSocket.emit("game_get_score", {
+    //     userIdx1: gameState.aPlayer.id,
+    //     userScore1: 5,
+    //     userIdx2: gameState.bPlayer.id,
+    //     userScore2: 0,
+    //     issueDate: Date.now(),
+    //     gameStatus: "game_quit",
+    //     winner: gameState.aPlayer.id,
+    //   });
+    //   setOpenModal(true);
+    //   setTimeout(() => {
+    //     router.replace("./gameresult");
+    //   }, 2000);
+    // });
+    return () => {
+      removeEventListener("popstate", preventGoBack);
+      removeEventListener("keydown", preventRefresh);
+      removeEventListener("beforeunload", preventRefreshButton);
+    };
   }, []);
 
+  if (!client) return <></>;
+
   return (
-    <ThemeProvider theme={font}>
+    <>
       <Card sx={{ display: "flex" }}>
         <Stack
           sx={{
             width: "100%",
             height: "100vh",
-            backgroundColor: main.main1,
+            backgroundImage: `url("/background.png")`,
             padding: 0,
             margin: 0,
           }}
         >
-          <Button
-            onClick={() => {
-              return router.push("./gameresult");
-            }}
-          >
-            결과창보기
-          </Button>
           <CardContent
             style={{
               display: "flex",
@@ -102,12 +115,12 @@ const GamePlaying = () => {
               }}
             >
               <Typography sx={{ fontSize: "3rem" }}>
-                {state.aScore} : {state.bScore}
+                {gameState.aScore} : {gameState.bScore}
               </Typography>
             </Card>
           </CardContent>
 
-          <CardContent sx={{ transform: "translateX(3%)" }}>
+          <CardContent sx={{ mx: "auto" }}>
             <Card
               style={{
                 width: "max-content",
@@ -133,8 +146,9 @@ const GamePlaying = () => {
               >
                 Player 1
               </Card>
+
               <PingPong />
-              {/* <Pong /> */}
+
               <Card
                 style={{
                   width: "max-content",
@@ -165,7 +179,7 @@ const GamePlaying = () => {
             <Card
               style={{
                 width: "20%",
-                height: "5vh",
+                height: "max-content",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -173,62 +187,41 @@ const GamePlaying = () => {
                 backgroundColor: "#05BEFF",
               }}
             >
-              Mode: {state.gameMode} || Speed: {state.ballSpeedOption} || Map:{" "}
-              {state.mapType}
+              <Typography>
+                Mode:{" "}
+                {gameState.gameMode === 0
+                  ? "Friend"
+                  : gameState.gameMode === 1
+                  ? "Normal"
+                  : "Rank"}
+                <br />
+                Speed:{" "}
+                {gameState.ballSpeedOption === 2
+                  ? "Slow"
+                  : gameState.ballSpeedOption === 3
+                  ? "Normal"
+                  : "Fast"}
+                <br />
+                Map: {gameState.mapType}
+              </Typography>
             </Card>
-            <Button variant="contained" onClick={handleOpenModal_redir}>
-              상대방 탈주시
-            </Button>
-            <Modal open={openModal}>
-              <Box sx={modalStyle} borderRadius={"10px"}>
-                <Card
-                  style={{
-                    width: "100%",
-                    height: "20%",
-                    backgroundColor: main.main4,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {/* 상단 안내메세지 */}
-                  <CardContent
-                    style={{
-                      width: "100%",
-                      height: "20%",
-                      backgroundColor: main.main4,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    안내메세지
-                  </CardContent>
-                </Card>
-                <Card
-                  style={{
-                    width: "100%",
-                    height: "90%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flexDirection: "column",
-                  }}
-                >
-                  <CardContent
-                    style={{
-                      width: "100%",
-                      height: "40%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    상대방이탈주했습니다. 결과페이지로 이동합니다
-                  </CardContent>
-                </Card>
-              </Box>
-            </Modal>
+            <Modals
+              isShowing={isShowing}
+              hide={toggle}
+              message="뒤로가기 멈춰!"
+              routing="/?from=game"
+            />
+            <Button onClick={() => setOpenModal(true)}>탈주시</Button>
+            <Modals
+              isShowing={openModal}
+              message="상대방이 탈주했습니다. 결과페이지로 이동합니다"
+            />
+            <Modals
+              isShowing={isShowing2}
+              hide={toggle2}
+              message="새로고침 멈춰!"
+              routing="/?from=game"
+            />
           </CardContent>
           <CardContent
             style={{
@@ -250,14 +243,14 @@ const GamePlaying = () => {
                 fontSize: "1.5rem",
                 backgroundColor: "#FB5C12",
               }}
-              onClick={BackToMain}
+              onClick={backToMain}
             >
               도망가기
             </Button>
           </CardContent>
         </Stack>
       </Card>
-    </ThemeProvider>
+    </>
   );
 };
 export default GamePlaying;

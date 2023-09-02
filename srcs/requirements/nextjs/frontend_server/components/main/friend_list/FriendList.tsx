@@ -6,16 +6,6 @@ import { useEffect, useState } from "react";
 import { main } from "@/font/color";
 import { useFriend } from "@/context/FriendContext";
 
-export interface IFriend {
-  friendNickname: string;
-  isOnline: boolean;
-}
-
-export interface IBlock {
-  targetNickname: string;
-  targetIdx: number;
-}
-
 const selectedButton = {
   backgroundColor: main.main1,
   color: "white",
@@ -46,22 +36,38 @@ const unselectedButton = {
   flex: 1,
 };
 
-interface IUserProp {
+export interface IFriend {
   friendNickname: string;
+  friendIdx: number;
   isOnline: boolean;
+}
+
+export interface IBlock {
+  targetNickname: string;
+  targetIdx: number;
+}
+
+interface IUserProp {
+  friendNickname?: string;
+  friendIdx?: number;
+  isOnline?: boolean;
   targetNickname?: string;
   targetIdx?: number;
 }
 
 const FriendList = () => {
   const [select, setSelect] = useState<boolean>(false);
-  const [showlist, setShowlist] = useState<IFriend[] | IBlock[]>([]);
+  const [showlist, setShowlist] = useState<IUserProp[]>([]);
   const { friendState } = useFriend();
+  const [client, setClient] = useState(false);
 
   useEffect(() => {
+    setClient(true);
     const cur = select ? friendState.blockList : friendState.friendList;
     setShowlist(cur);
-  }, [friendState.friendList, friendState.blockList, select]);
+  }, [friendState.friendList, friendState.blockList, select, showlist]);
+
+  if (!client) return <></>;
 
   return (
     <Card
@@ -127,10 +133,9 @@ const FriendList = () => {
           }}
         >
           {showlist
-            ? showlist.map((user, idx) => (
+            && showlist.map((user, idx) => (
                 <Friend key={idx} prop={user as IUserProp} />
-              ))
-            : []}
+              ))}
         </Card>
       </Stack>
     </Card>

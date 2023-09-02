@@ -29,6 +29,7 @@ const modalStyle = {
 const Login = () => {
   const router = useRouter();
   const [url, setUrl] = useState("");
+  const [client, setClient] = useState(false);
 
   const handleLogin = () => {
     router.push(url);
@@ -37,6 +38,12 @@ const Login = () => {
   useEffect(() => {
     setUrl(process.env.NEXT_PUBLIC_REDIRECTURL!);
   }, []);
+
+  useEffect(() => {
+    setClient(true);
+  }, []);
+
+  if (!client) return <></>;
 
   return (
     <Box>

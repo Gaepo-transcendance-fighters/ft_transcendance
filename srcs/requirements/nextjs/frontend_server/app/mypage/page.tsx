@@ -21,6 +21,12 @@ const font = createTheme({
   },
 });
 
+interface UserEditprofileDto {
+  userIdx: number;
+  userNickname: string;
+  imgUrl: any;
+}
+
 const modalStyle = {
   position: "absolute" as "absolute",
   top: "50%",
@@ -47,88 +53,189 @@ const myProfileStyle = {
   p: 4,
 };
 
-import { useRouter, useSearchParams } from "next/navigation";
+interface IUserData {
+  nickname: string;
+  imgUrl: string;
+  win: number;
+  lose: number;
+  rank: number;
+  email: string;
+}
 
+interface Modals {
+  nickNameModal: boolean;
+  authModal: boolean;
+}
+
+import { useRouter, useSearchParams } from "next/navigation";
 import { main } from "@/type/type";
-import { useState } from "react";
-import { get } from "https";
+import React, { useEffect, useState, ChangeEvent } from "react";
 import MyGameLog from "@/components/main/myprofile/MyGameLog";
 import { useUser } from "@/context/UserContext";
+import axios from "axios";
+
+import SecondAuth from "@/components/main/myprofile/SecondAuth";
+import { useAuth } from "@/context/AuthContext";
 
 export default function PageRedir() {
-  // async function GetData() {
-  //   const response = await fetch("/user/profile"); // <- user를 쿼리에서 받아온거로 변경해야함.
-  //   const data = await response.json();
-  // }
-
-  // async function SendImg(uri: string) {
-  //   const request = await fetch("/user/profile/:my_nickname", {
-  //     method: "POST",
-  //     body: JSON.stringify(uri),
-  //     headers: {
-  //       "Content-Type": "img-uri",
-  //     },
-  //   });
-  // }
-
-  // async function SendNewName(newname: string) {
-  //   const request = await fetch("/user/profile/:my_nickname", {
-  //     method: "POST",
-  //     body: JSON.stringify(newname),
-  //     headers: {
-  //       "Content-Type": "new-name",
-  //     },
-  //   });
-  // }
-
-  const { userState } = useUser();
-
   const router = useRouter();
+  const { userState } = useUser();
+  const { authState } = useAuth();
+  const [userData, setUserData] = useState<IUserData>({
+    nickname: "",
+    imgUrl: "",
+    win: 0,
+    lose: 0,
+    rank: 0,
+    email: "",
+  });
+
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  //로컬에 check2Auth는 스트링형태. 받아올때도 스트링이니까 넘버로 바꿨다가 전송해줄때 string으로 변경.
+
+  const [verified, setVerified] = useState<string>("");
+
+  const [inputName, setInputName] = useState<string>("");
+
+  const [reload, setReload] = useState<boolean>(false);
+
+  useEffect(() => {
+    // const getData = () => {
+    const verified = localStorage.getItem("check2Auth");
+    if (!verified) return;
+    setVerified(verified);
+    const headers = {
+      Authorization: "Bearer " + localStorage.getItem("authorization"),
+    };
+    axios
+      .get("http://paulryu9309.ddns.net:4000/users/profile", { headers })
+      .then((response) => {
+        setUserData(response.data);
+      });
+    // };
+    console.log("API REQUEST");
+  }, [reload, verified]);
+
+  const OpenFileInput = () => {
+    document.getElementById("file_input")?.click();
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+
+    const files = event.target.files;
+    if (files) {
+      uploadImage(files[0]);
+    }
+  };
+
+  const uploadImage = async (file: File) => {
+    // readAsDataURL을 사용해 이미지를 base64로 변환
+    const dataUrl: string = await readFileAsDataURL(file);
+
+    const formData = new FormData();
+    formData.append("userIdx", Number(localStorage.getItem("idx")).toString());
+    formData.append("userNickname", "");
+    formData.append("imgUrl", dataUrl);
+    console.log("formData", formData);
+
+    try {
+      await axios({
+        // method: "POST",
+        // url: `http://localhost:4000/users/profile`,
+        method: "PUT",
+        url: `http://paulryu9309.ddns.net:4000/users/profile/${userData?.nickname}`,
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: "Bearer " + localStorage.getItem("authorization"),
+        },
+        data: formData,
+      });
+    } catch (error) {
+      console.error("업로드 실패", error);
+    }
+    setReload((curr) => !curr);
+  };
+
+  const readFileAsDataURL = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        if (typeof e.target?.result === "string") {
+          resolve(e.target.result);
+        } else {
+          reject(new Error("FileReader error"));
+        }
+      };
+
+      reader.onerror = (e) => {
+        reject(new Error("FileReader error"));
+      };
+
+      reader.readAsDataURL(file);
+    });
+  };
+
+  //body가 아니라 data로 보내야한다고함..?data에 객체를 직접 전달해도 axios가 JSON형태로 변환함.
+  const onChangeNickName = async () => {
+    if (inputName === "") return alert("입력값이 없습니다");
+    if (inputName === userData?.nickname) {
+      return alert("현재 닉네임과 동일합니다!");
+    }
+
+    try {
+      let idx: number = Number(localStorage.getItem("idx"));
+      const response = await axios({
+        // method: "POST",
+        // url: `http://localhost:4000/users/profile`,
+        method: "PATCH",
+        url: `http://paulryu9309.ddns.net:4000/users/profile/${userData?.nickname}`,
+
+        headers: {
+          "Content-Type": "Application/json",
+          Authorization: "Bearer " + localStorage.getItem("authorization"),
+        },
+        data: JSON.stringify({
+          userIdx: Number(localStorage.getItem("idx")),
+          userNickname: inputName,
+          imgUrl: localStorage.getItem("imgUri"),
+        }),
+      });
+      if (response.status === 400) alert("이미 존재하는 닉네임입니다");
+      else if (response.status === 200) {
+        console.log("Success");
+        handleCloseModal();
+      }
+    } catch (error) {
+      console.log("닉네임 변경중 문제가 발생");
+    }
+    setReload((curr) => !curr);
+  };
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleOnInput = (e: ChangeEvent<HTMLInputElement>) => {
+    e.target.value = e.target.value.replace(/[^A-Za-z\s]/gi, "");
+  };
 
   const BackToHome = () => {
     router.push("/");
   };
 
-  const searchParams = useSearchParams();
-  const nickname = searchParams.toString();
-  // console.log(nickname);
-
-  const [checked, setChecked] = useState(true);
-
-  // const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   setChecked(event.target.checked);
-  //   if (verified == true) setVerified(false);
-  //   else setVerified(true);
-  // };
-
-  console.log();
-  const OpenFileInput = () => {
-    document.getElementById("file_input")?.click();
+  const RankImgSelect = (data: IUserData) => {
+    if (data.rank < 800) return "./rank/exp_medal_bronze.png";
+    else if (data.rank >= 800 && data.rank < 1100)
+      return "./rank/exp_medal_silver.png";
+    else if (data.rank >= 1100) return "./rank/exp_medal_gold.png";
   };
 
-  const HandleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filelist = event.target.files;
-  };
-
-  const [openModal, setOpenModal] = useState<boolean>(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [verified, setVerified] = useState<boolean>(false);
-
-  const handleOpenModal = () => {
-    setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  };
-
-  const handleOpenMenu = (e: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(e.currentTarget);
-  };
-
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
-  };
+  const RankSrc = RankImgSelect(userData);
 
   return (
     <>
@@ -209,8 +316,7 @@ export default function PageRedir() {
                       mx={5}
                     >
                       <Avatar
-                        // src="https://image.fmkorea.com/files/attach/new3/20230426/2895716/2869792504/5712239214/67b5b96fceb24c036e6f7368386974d5.png"
-                        src={userState.imgUri}
+                        src={userData?.imgUrl}
                         style={{
                           width: "100%",
                           height: "75%",
@@ -218,7 +324,7 @@ export default function PageRedir() {
                         }}
                       />
                     </Box>
-                    {/* 중간에 있는 텍스트 */}
+                    {/* 이미지, 닉네임, 2차인증, */}
                     <Stack
                       sx={{
                         width: "20vw",
@@ -232,11 +338,11 @@ export default function PageRedir() {
                         }}
                         style={{ fontSize: "3rem" }}
                       >
-                        {userState.nickname}
+                        {userData?.nickname}
                       </Typography>
 
                       <CardContent style={{ width: "100%" }}>
-                        {verified == true ? (
+                        {verified === "true" ? (
                           <Typography style={{ fontSize: "1.5rem" }}>
                             2차인증 여부 : Y
                           </Typography>
@@ -248,7 +354,7 @@ export default function PageRedir() {
                       </CardContent>
                       <CardContent style={{ width: "100%" }}>
                         <Typography style={{ fontSize: "1.2rem" }}>
-                          Email : studentof42@42seoul.kr
+                          Email : {userData?.email}
                         </Typography>
                       </CardContent>
                       {/* 버튼관련 스택 */}
@@ -257,24 +363,30 @@ export default function PageRedir() {
                         spacing={2}
                         padding={"20px 0px 0px 2px"}
                       >
+                        <form>
+                          {/* <label htmlFor="profile-upload" /> */}
+                          <Button
+                            onClick={OpenFileInput}
+                            style={{
+                              minWidth: "max-content",
+                            }}
+                            variant="contained"
+                          >
+                            사진변경
+                          </Button>
+                          <input
+                            type="file"
+                            id="file_input"
+                            name="Change_IMG"
+                            style={{ display: "none" }}
+                            accept="image/png, image/jpg, image/jpeg"
+                            // onChange={onChangeImg}
+                            onChange={handleChange}
+                          />
+                        </form>
+
                         <Button
-                          onClick={OpenFileInput}
-                          style={{
-                            minWidth: "max-content",
-                          }}
-                          variant="contained"
-                        >
-                          사진변경
-                        </Button>
-                        <input
-                          type="file"
-                          id="file_input"
-                          style={{ display: "none" }}
-                          accept="image/png, image/jpg, image/jpeg"
-                          onChange={HandleFileUpload}
-                        />
-                        <Button
-                          type="button"
+                          type="submit"
                           style={{
                             minWidth: "max-content",
                           }}
@@ -297,6 +409,7 @@ export default function PageRedir() {
                               >
                                 변경할 닉네임을 입력하세요
                               </CardContent>
+
                               <Stack direction={"row"}>
                                 <Card
                                   style={{
@@ -312,15 +425,32 @@ export default function PageRedir() {
                                     overflow: "scroll",
                                   }}
                                 >
-                                  <Input
+                                  <input
                                     type="text"
-                                    sx={{ width: "40%" }}
-                                  ></Input>
+                                    maxLength={10}
+                                    style={{
+                                      width: "40%",
+                                      height: "32px",
+                                      fontSize: "15px",
+                                      border: 0,
+                                      borderRadius: "15px",
+                                      outline: "none",
+                                      paddingLeft: "10px",
+                                      backgroundColor: "#E9E9E9",
+                                    }}
+                                    onInput={handleOnInput}
+                                    onChange={(event) => {
+                                      setInputName(event?.target.value);
+
+                                      console.log(inputName);
+                                    }}
+                                  />
                                   <Button
                                     style={{
                                       border: "0.1px solid black",
                                       backgroundColor: "lightGray",
                                     }}
+                                    onClick={onChangeNickName}
                                   >
                                     입력
                                   </Button>
@@ -329,23 +459,7 @@ export default function PageRedir() {
                             </Card>
                           </Box>
                         </Modal>
-                        <Button
-                          type="button"
-                          style={{
-                            minWidth: "max-content",
-                          }}
-                          variant="contained"
-                          onClick={() => {
-                            if (verified == true) setVerified(false);
-                            else setVerified(true);
-                          }}
-                        >
-                          {verified == true ? (
-                            <>2차인증 비활성화</>
-                          ) : (
-                            <>2차인증 활성화</>
-                          )}
-                        </Button>
+                        <SecondAuth />
                       </Stack>
                     </Stack>
                   </Card>
@@ -356,12 +470,13 @@ export default function PageRedir() {
                   >
                     <CardContent sx={{ paddingBottom: 0 }}>전적</CardContent>
                     <Stack direction={"row"}>
+                      {/* 이미지 */}
                       <Card
                         sx={{
                           margin: 1,
                           marginRight: 0,
                           width: "30%",
-                          height: "max-content",
+                          // height: "90%",
                         }}
                       >
                         <CardContent
@@ -371,15 +486,23 @@ export default function PageRedir() {
                             "&:last-child": { paddingBottom: "16px" },
                           }}
                         >
-                          <Typography margin={1}>랭크(포인트)</Typography>
-                          <Typography margin={1}>승률</Typography>
+                          <img
+                            src={RankSrc}
+                            style={{
+                              width: "70%",
+                              height: "70%",
+                              display: "block",
+                              margin: "0 auto",
+                            }}
+                          ></img>
                         </CardContent>
                       </Card>
+                      {/* !이미지 */}
                       <Card
                         sx={{
                           margin: 1,
                           width: "70%",
-                          height: "max-content",
+                          height: "60%",
                         }}
                       >
                         <CardContent
@@ -389,8 +512,16 @@ export default function PageRedir() {
                             "&:last-child": { paddingBottom: "16px" },
                           }}
                         >
-                          <Typography margin={1}>3000</Typography>
-                          <Typography margin={1}>0%</Typography>
+                          <Typography margin={1}>
+                            랭크(포인트) : {userData.rank}
+                          </Typography>
+                          <Typography margin={1}>
+                            승률 :{" "}
+                            {userData.win + userData.lose === 0 ? 0 : Math.floor(
+                              (userData.win / (userData.win + userData.lose)) *
+                                100
+                            )}%
+                          </Typography>
                         </CardContent>
                       </Card>
                     </Stack>
@@ -455,7 +586,7 @@ export default function PageRedir() {
                         width: "100%",
                       }}
                     >
-                      <MyGameLog />
+                      {/* <MyGameLog /> */}
                     </Box>
                   </Card>
                 </Stack>

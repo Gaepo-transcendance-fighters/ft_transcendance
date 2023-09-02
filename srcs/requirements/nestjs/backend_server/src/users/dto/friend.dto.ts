@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 import { FriendList } from '../../entity/friendList.entity';
+import { OnlineStatus } from 'src/entity/users.entity';
 
 export class FollowFriendDto {
   myIdx : number;
@@ -18,12 +19,12 @@ export class FollowFriendDto {
   targetIdx : number;
 }
 
-export class FriendResDto {
-  friendList: FriendList[];
+export class FriendListResDto {
+  FriendList: FriendDto[];
 }
 
 export class FriendDto {
-  frindNickname : string;
+  friendNickname : string;
   friendIdx : number;
-  isOnline : boolean;
+  isOnline : OnlineStatus;
 }

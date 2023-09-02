@@ -7,7 +7,7 @@ import MemberList from "../member_list/MemberList";
 import CreateRoomButton from "./CreateRoomButton";
 import Room from "./Room";
 import { useRoom } from "@/context/RoomContext";
-import { IChatRoom } from "@/type/type";
+import { IChatRoom } from "@/type/RoomType";
 
 export default function Rooms({
   currentRoomList,

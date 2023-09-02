@@ -1,6 +1,6 @@
 import { ReactNode, createContext, useContext, useReducer } from "react";
 
-interface UserContextData {
+export interface UserContextData {
   imgUri: string;
   nickname: string;
   userIdx: number;

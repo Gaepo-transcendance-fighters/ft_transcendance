@@ -5,7 +5,8 @@ import Rooms from "./Rooms";
 import { useRoom } from "@/context/RoomContext";
 import { socket } from "@/app/page";
 import { useUser } from "@/context/UserContext";
-import { IChatRoom } from "@/type/type";
+import { IChatRoom, ReturnMsgDto, alert } from "@/type/RoomType";
+import { Alert } from "@mui/material";
 
 export default function RoomTypeButton() {
   const { roomState, roomDispatch } = useRoom();
@@ -41,23 +42,33 @@ export default function RoomTypeButton() {
   }, []);
 
   const NonDmBtnClick = () => {
-    socket.emit("chat_get_roomList", (ret: number) => {});
+    socket.emit("chat_get_roomList", (ret: ReturnMsgDto) => {});
     OnClick(true);
   };
 
   const DmBtnClick = () => {
     socket.emit(
       "chat_get_DMList",
-      JSON.stringify({
+      {
         userNickname: userState.nickname,
         userIdx: userState.userIdx,
-      }),
-      (ret: number) => {
+      },
+      (ret: ReturnMsgDto) => {
         console.log(ret);
       }
     );
     OnClick(false);
   };
+
+  useEffect(() => {
+    if (roomState.hasNewDmRoomAlert === true) {
+      const time = setTimeout(() => {
+        roomDispatch({ type:"SET_NEW_DM_ROOM_ALERT", value: false})
+      }, 3000);
+
+      return () => clearTimeout(time);
+    }
+  }, [roomState.hasNewDmRoomAlert]);
 
   return (
     <>
@@ -81,6 +92,11 @@ export default function RoomTypeButton() {
         currentRoomList={disabled ? roomState.nonDmRooms : roomState.dmRooms}
         channelType={disabled}
       />
+      {roomState.hasNewDmRoomAlert === true ? (
+        <Alert sx={alert} severity="info" style={{ width: "333px" }}>
+          You have new Direct Message Channel!
+        </Alert>
+      ) : null}
     </>
   );
 }

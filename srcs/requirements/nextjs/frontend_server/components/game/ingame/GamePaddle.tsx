@@ -1,5 +1,4 @@
 import { Box } from "@mui/material";
-import React, { useRef } from "react";
 
 const GamePaddle = ({ x, y }: { x: number; y: number }) => {
   return (

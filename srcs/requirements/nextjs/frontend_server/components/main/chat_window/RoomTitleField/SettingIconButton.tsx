@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import IconButton from "@mui/material/IconButton";
-import { useState, forwardRef } from "react";
+import { useState, forwardRef, useEffect } from "react";
 import Stack from "@mui/material/Stack";
 import { Modal } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -14,26 +14,50 @@ const Bar = forwardRef((props: any, ref: any) => (
   </span>
 ));
 
-export default function SettingIconButton() {
+export default function SettingIconButton({
+  showAlert,
+  setShowAlert,
+}: {
+  showAlert: boolean;
+  setShowAlert: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  useEffect(() => {
+    if (showAlert) {
+      console.log("alret 켜졌다.");
+      const time = setTimeout(() => {
+        setShowAlert(false);
+        console.log("alret 꺼졌다.");
+      }, 3000);
+
+      return () => clearTimeout(time);
+    }
+  }, [showAlert]);
+
   return (
-    <Stack direction="row" spacing={0}>
-      <IconButton aria-label="setting" onClick={handleOpen}>
-        <SettingsIcon />
-      </IconButton>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Bar>
-          <EditRoomModal prop={handleClose} />
-        </Bar>
-      </Modal>
-    </Stack>
+    <>
+      <Stack direction="row" spacing={0}>
+        <IconButton aria-label="setting" onClick={handleOpen}>
+          <SettingsIcon />
+        </IconButton>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Bar>
+            <EditRoomModal
+              prop={handleClose}
+              showAlert={showAlert}
+              setShowAlert={setShowAlert}
+            />
+          </Bar>
+        </Modal>
+      </Stack>
+    </>
   );
 }

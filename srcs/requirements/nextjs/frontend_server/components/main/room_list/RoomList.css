@@ -1,3 +1,4 @@
+/* TODO : 자스에서 css 클래스이름 작명 어떻게 하면 좋은지 알아보고 적용  */
 .chatroomlist {
   background-color: #1c478e;
   text-align: center;
@@ -87,7 +88,6 @@
   font-family: "crazy";
   display: flex;
   align-items: center;
-
   background-color: #67dbfb;
   border-radius: 10px;
   height: 50px;
@@ -106,15 +106,12 @@
   font-family: "crazy";
   display: flex;
   align-items: center;
-
-  /* background-color: #67dbfb; */
   background-color: #7b8aa9;
   border-radius: 10px;
   height: 50px;
   border: 0px;
   margin: 8px auto;
   width: 100%;
-  /* color: black; */
   color: rgba(255, 255, 255, 0.294);
   font-size: 18px;
   padding-left: 10px;

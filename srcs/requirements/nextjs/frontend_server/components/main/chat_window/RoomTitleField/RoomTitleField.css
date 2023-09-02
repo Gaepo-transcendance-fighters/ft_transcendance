@@ -45,8 +45,10 @@
 }
 
 .room_setting {
+  padding-bottom: 5px;
 }
 
 .room_exit {
-  padding-right: 3px;
+  padding-right: 6px;
+  padding-bottom: 5px;
 }

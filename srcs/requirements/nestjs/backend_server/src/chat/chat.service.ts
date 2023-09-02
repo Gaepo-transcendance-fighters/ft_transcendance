@@ -129,14 +129,14 @@ export class ChatService {
         target,
         channelIdx,
       );
-      const firstDM = await this.directMessagesRepository.sendDm(
-        msg,
-        client,
-        channelIdx,
-      );
+      // const firstDM = await this.directMessagesRepository.sendDm(
+      //   msg,
+      //   client,
+      //   channelIdx,
+      // );
       await queryRunner.manager.save(list[0]);
       await queryRunner.manager.save(list[1]);
-      await this.directMessagesRepository.save(firstDM);
+      // await this.directMessagesRepository.save(firstDM);
 
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -201,28 +201,72 @@ export class ChatService {
     // TODO: 예외처리 필요
     await this.createDmChannel(user, targetUser, channelIdx, msg);
 
-    const msgInfo: MessageInteface = {
-      sender: user.nickname,
-      msg: msg.msg,
-      msgDate: new Date().toString(),
-    };
-    const dmInfo = {
-      message: msgInfo,
-      channelIdx: channelIdx,
-    };
+    const userChannelsInfo = [];
+    const targetChannelsInfo = [];
+
+    const userChannels: DMChannel[] =
+      await this.dmChannelRepository.findDMChannelsByUserIdx(user.userIdx);
+    for (const channel of userChannels) {
+      const blockList = this.inMemoryUsers.getBlockListByIdFromIM(
+        channel.userIdx1,
+      );
+      const isBlocked = blockList.some(
+        (user) => user.blockedUserIdx === channel.userIdx2,
+      );
+      if (!isBlocked) {
+        // 원하는 속성만 뽑아서 객체로 만들고 push 하기
+        const channelInfo = {
+          targetNickname: channel.userNickname2,
+          channelIdx: channel.channelIdx,
+          mode: Mode.PRIVATE,
+        };
+        userChannelsInfo.push(channelInfo);
+      }
+    }
+    const targetChannels: DMChannel[] =
+      await this.dmChannelRepository.findDMChannelsByUserIdx(
+        targetUser.userIdx,
+      );
+    for (const channel of targetChannels) {
+      const blockList = this.inMemoryUsers.getBlockListByIdFromIM(
+        channel.userIdx2,
+      );
+      const isBlocked = blockList.some(
+        (user) => user.blockedUserIdx === channel.userIdx2,
+      );
+      if (!isBlocked) {
+        // 원하는 속성만 뽑아서 객체로 만들고 push 하기
+        const channelInfo = {
+          targetNickname: channel.userNickname2,
+          channelIdx: channel.channelIdx,
+          mode: Mode.PRIVATE,
+        };
+        targetChannelsInfo.push(channelInfo);
+      }
+    }
     if (checkBlock) {
-      console.log('차단된 유저입니다.');
+      this.messanger.logWithMessage(
+        'createDM',
+        'checkBlock',
+        'true',
+        '차단된 유저입니다.',
+      );
     } else {
-      // 상대방 소켓 찾아서 join 시키기
       const targetSocket = await this.chat.getSocketObject(targetUser.userIdx);
       if (targetSocket) {
         await targetSocket.socket.join(`chat_room_${channelIdx}`);
+        await targetSocket.socket.emit('create_dm', targetChannelsInfo);
       } else {
-        console.log('상대방이 오프라인입니다.');
+        this.messanger.logWithMessage(
+          'createDM',
+          'targetSocket',
+          'null',
+          '상대방 소켓이 없습니다.',
+        );
       }
     }
     client.join(`chat_room_${channelIdx}`);
-    return dmInfo;
+    return userChannelsInfo;
   }
 
   async createPublicAndProtected(password: string, user: UserObject) {
@@ -297,6 +341,7 @@ export class ChatService {
         user,
         channelIdx,
       );
+      console.log(dm);
       await queryRunner.manager.save(dm);
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -474,6 +519,7 @@ export class ChatService {
   }
 
   changePassword(channel: Channel, password: string) {
+    console.log('pw: ', password);
     channel.setPassword = password;
     if (password === '' || !password) {
       channel.setMode = Mode.PUBLIC;
@@ -612,7 +658,7 @@ export class ChatService {
   async getChatMessagesByInfinity(channelIdx: number, msgDate: string) {
     // 일단 channelIdx 로 채널을 꾸려야한다.
     const messages = await this.directMessagesRepository.find({
-      where: [{ channelIdx: channelIdx, msgDate: LessThanOrEqual(msgDate) }],
+      where: [{ channelIdx: channelIdx, msgDate: LessThan(msgDate) }],
       order: {
         msgDate: 'DESC',
       },

@@ -5,7 +5,7 @@ import { Box, Button, Card, Stack, TextField, Typography } from "@mui/material";
 import "@/components/main/room_list/RoomList.css";
 import Modal from "@mui/material/Modal";
 import { useRoom } from "@/context/RoomContext";
-import { IChatRoom, Mode, Permission } from "@/type/type";
+import { IChatRoom, Mode, Permission, ReturnMsgDto } from "@/type/RoomType"
 import { socket } from "@/app/page";
 import { useUser } from "@/context/UserContext";
 
@@ -38,30 +38,29 @@ export default function CreateRoomModal({
     setOpen(false);
   };
 
-
-  
   useEffect(() => {
     const ChatCreateRoom = (data: IChatRoom) => {
       roomDispatch({ type: "ADD_ROOM", value: data });
-      if (data.owner !== userState.nickname)
-        return ;
+      if (data.owner !== userState.nickname) return;
       if (
         roomState.currentRoom &&
         roomState.currentRoom.mode !== Mode.PRIVATE
       ) {
         socket.emit(
           "chat_goto_lobby",
-          JSON.stringify({
+          {
             channelIdx: roomState.currentRoom.channelIdx,
             userIdx: userState.userIdx,
-          }),
-          (ret: number | string) => {
-            console.log("chat_goto_lobby ret : ", ret);
+          },
+          (ret: ReturnMsgDto) => {
+            console.log("ChatCreateRoom chat_goto_lobby ret : ", ret);
           }
         );
       }
       roomDispatch({ type: "SET_CUR_ROOM", value: data });
+      console.log("ChatCreateRoom : ", data);
       roomDispatch({ type: "SET_IS_OPEN", value: true });
+      console.log("ChatCreateRoom2 : ", roomState.isOpen);
       roomDispatch({
         type: "SET_CUR_MEM",
         value: [
@@ -84,13 +83,10 @@ export default function CreateRoomModal({
   }, [userState.userIdx, roomState.currentRoom]);
 
   const OnClick = () => {
-    socket.emit(
-      "BR_chat_create_room",
-      JSON.stringify({ password: value }),
-      (ret: number) => {
-        // if (ret === 200)
-      }
-    );
+    socket.emit("BR_chat_create_room", { password: value }, (ret: ReturnMsgDto) => {
+      console.log("OnClick : ", ret);
+      // if (ret === 200)
+    });
   };
 
   return (

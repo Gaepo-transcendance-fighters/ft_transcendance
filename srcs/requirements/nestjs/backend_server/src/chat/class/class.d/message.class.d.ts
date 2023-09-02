@@ -4,7 +4,7 @@ declare class Message {
   private channelIdx: number;
   private sender: number;
   private message: string;
-  private msgDate: Date;
+  private msgDate: string;
 
   /******************************* 메서드 *******************************/
   // TODO: getMessage, setMessage 필요할까?
@@ -12,11 +12,11 @@ declare class Message {
   get getChannelInfo(): any; // 필요할까? 필요하면 DTO?
   get getChannelIdx(): number;
   get getSender(): number;
-  get getMsgDate(): Date;
+  get getMsgDate(): string;
 
   // setter
   set setChannelInfo(channelInfo: any); // 필요할까? 필요하면 DTO?
   set setChannelIdx(channelIdx: number);
   set setSender(sender: number);
-  set setMsgDate(msgDate: Date);
+  set setMsgDate(msgDate: string);
 }

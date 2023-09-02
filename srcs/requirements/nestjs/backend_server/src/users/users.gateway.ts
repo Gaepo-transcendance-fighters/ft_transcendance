@@ -11,7 +11,7 @@ import {
 import { UsersService } from './users.service';
 import { Server, Socket } from 'socket.io';
 import { Logger, UseFilters, UseGuards, UsePipes } from '@nestjs/common';
-import { FollowFriendDto, FriendResDto } from './dto/friend.dto';
+import { FollowFriendDto } from './dto/friend.dto';
 import { WsExceptionFilter } from 'src/ws.exception.filter';
 import { WsValidationPipe } from 'src/ws.exception.pipe';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -44,30 +44,30 @@ export class UsersGateway
   handleDisconnect(client: any) {
     console.log(`[ Users ] Client disconnected: ${client.id}`);
   }
-  @SubscribeMessage('add_friend')
-    async handleAddFriend(
-      @ConnectedSocket() client: Socket,
-      @MessageBody() req: FollowFriendDto,
-  ) {
-      const { myIdx, targetNickname, targetIdx } = req;
-      console.log('req', req);
+  // @SubscribeMessage('add_friend')
+  //   async handleAddFriend(
+  //     @ConnectedSocket() client: Socket,
+  //     @MessageBody() req: FollowFriendDto,
+  // ) {
+  //     const { myIdx, targetNickname, targetIdx } = req;
+  //     console.log('req', req);
       
-      // logic
-      const myUser = await this.usersService.findOneUser(myIdx);
-      const res = await this.usersService.addFriend(req, myUser);
-      console.log('res', res);
-      client.emit('add_friend', res);
-  }
+  //     // logic
+  //     const myUser = await this.usersService.findOneUser(myIdx);
+  //     const res = await this.usersService.addFriend(req, myUser);
+  //     console.log('res', res);
+  //     client.emit('add_friend', res);
+  // }
 
-  @SubscribeMessage('delete_friend')
-  async handleDeleteFriend(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() req: FollowFriendDto,
-  ) {
-      const { myIdx, targetNickname, targetIdx } = req;
-      // logic
-      const myUser = await this.usersService.findOneUser(myIdx);
-      const res = await this.usersService.deleteFriend(req, myUser);
-      client.emit('delete_friends', res);
-    }
+  // @SubscribeMessage('delete_friend')
+  // async handleDeleteFriend(
+  //   @ConnectedSocket() client: Socket,
+  //   @MessageBody() req: FollowFriendDto,
+  // ) {
+  //     const { myIdx, targetNickname, targetIdx } = req;
+  //     // logic
+  //     const myUser = await this.usersService.findOneUser(myIdx);
+  //     const res = await this.usersService.deleteFriend(req, myUser);
+  //     client.emit('delete_friends', res);
+  //   }
 }

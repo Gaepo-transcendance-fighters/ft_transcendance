@@ -27,7 +27,7 @@ export const intraApiMyInfoUri = 'https://api.intra.42.fr/v2/me';
 export class LoginService {
   constructor(
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
   private logger: Logger = new Logger('LoginService');
 
   async getAccessToken(code: string): Promise<any> {
@@ -39,7 +39,6 @@ export class LoginService {
       code: code,
       redirect_uri: frontcallback,
     };
-    console.log( "body : ",body);
     try {
       const response = await axios.post(intraApiTokenUri, body);
       this.logger.log(`getAccessToken: response.data.access_token : ${response.data.access_token}`)
@@ -60,17 +59,17 @@ export class LoginService {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       const userInfo = response.data;
-    
-    return {
-      userIdx: userInfo.id,
-      intra: userInfo.login,
-      imgUri: userInfo.image.versions.small,
-      token : token,
-      email: userInfo.email,
-      check2Auth: false,
-    };
+
+      return {
+        userIdx: userInfo.id,
+        intra: userInfo.login,
+        imgUri: userInfo.image.versions.small,
+        token: token,
+        email: userInfo.email,
+        check2Auth: false,
+      };
     } catch (error) {
       // 에러 핸들링
       console.error('Error making GET request:', error);
@@ -79,8 +78,19 @@ export class LoginService {
 
   async issueToken(payload: JwtPayloadDto) {
     const paytoken = jwt.sign(payload, jwtSecret);
-    
+
     this.logger.log('paytoken', paytoken);
     return paytoken;
+  }
+
+  async downloadProfileImg(intraInfo: IntraInfoDto) {
+    const { userIdx, imgUri } = intraInfo;
+    const imgData = await axios.get(imgUri, { responseEncoding: 'base64' }),
+    fs = require('fs');
+    fs.mkdirSync('public/img/', { recursive: true });
+    fs.writeFileSync(
+      `public/img/${userIdx}.png`,
+      Buffer.from(imgData.data, 'base64'),
+    );
   }
 }

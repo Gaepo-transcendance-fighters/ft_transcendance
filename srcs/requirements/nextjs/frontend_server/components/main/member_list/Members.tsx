@@ -3,7 +3,7 @@
 import Member from "./Member";
 import "@/components/main/member_list/MemberList.css";
 import { useRoom } from "@/context/RoomContext";
-import { IMember, Mode } from "@/type/type";
+import { IMember, Mode } from "@/type/RoomType";
 import { useUser } from "@/context/UserContext";
 import { useEffect, useState } from "react";
 

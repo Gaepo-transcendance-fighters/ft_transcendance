@@ -15,19 +15,60 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { main } from "@/type/type";
 import { useGame } from "@/context/GameContext";
+import { useAuth } from "@/context/AuthContext";
+import { gameSocket } from "../page";
+import { io } from "socket.io-client";
 
-type SpeedOption = "speed1" | "speed2" | "speed3";
-type MapOption = "map1" | "map2" | "map3";
+// type SpeedOption = "speed1" | "speed2" | "speed3";
+// type MapOption = "map1" | "map2" | "map3";
+
+enum SpeedOption {
+  speed1,
+  speed2,
+  speed3,
+}
+
+enum MapOption {
+  map1,
+  map2,
+  map3,
+}
+
+enum GameType {
+  FRIEND,
+  NORMAL,
+  RANK,
+}
+
+interface IGameOption {
+  gameType: GameType; // FRIED, NORMAL, RANK
+  userIdx: number;
+  speed: SpeedOption; //NORMAL, FAST, FASTER
+  mapNumber: MapOption; // A, B, C
+}
+
+// export const gameSocket = io("http://localhost:4000/game", {
+// const userId =
+//   typeof window !== "undefined" ? localStorage.getItem("idx") : null;
+
+// export const gameSocket = io("http://paulryu9309.ddns.net:4000/game", {
+//   query: { userId: userId },
+// });
 
 const OptionSelect = () => {
   const router = useRouter();
-  const { dispatch } = useGame();
+  const { gameState, gameDispatch } = useGame();
+  const { authState, authDispatch } = useAuth();
+  const [client, setClient] = useState(false);
 
-  const [selectedSpeedOption, setSelectedSpeedOption] =
-    useState<SpeedOption>("speed2");
+  const [selectedSpeedOption, setSelectedSpeedOption] = useState<SpeedOption>(
+    SpeedOption.speed2
+  );
 
-  const [selectedMapOption, setSelectedMapOption] = useState<MapOption>("map2");
-  const [countdown, setCountdown] = useState<number>(10);
+  const [selectedMapOption, setSelectedMapOption] = useState<MapOption>(
+    MapOption.map2
+  );
+  const [countdown, setCountdown] = useState<number>(3);
 
   const handleSpeedOptionChange = (option: SpeedOption) => {
     setSelectedSpeedOption((prevOption) =>
@@ -42,19 +83,79 @@ const OptionSelect = () => {
   };
 
   useEffect(() => {
+    if (!gameSocket) return;
+    gameSocket.on("game_queue_regist", () => {
+      console.log("game_queue_regist 받음");
+    });
+    gameSocket.on("game_option", () => {
+      console.log("game_option 받음");
+    });
+
+    return () => {
+      gameSocket.off("game_option");
+      gameSocket.off("game_queue_regist");
+    };
+  }, []);
+
+  useEffect(() => {
     countdown > 0 && setTimeout(() => setCountdown(countdown - 1), 1000);
     // 나중에 이거 풀면됨
     if (countdown == 0) cntRedir();
   }, [countdown]);
 
   const cntRedir = () => {
-    dispatch({ type: "SET_BALL_SPEED_OPTION", value: selectedSpeedOption });
-    dispatch({ type: "SET_MAP_TYPE", value: selectedMapOption });
+    if (!gameSocket) return;
+    gameDispatch({ type: "SET_BALL_SPEED_OPTION", value: selectedSpeedOption });
+    gameDispatch({ type: "SET_MAP_TYPE", value: selectedMapOption });
 
-    setTimeout(() => {
-      router.push("./inwaiting");
-    }, 300);
+    console.log(authState.id);
+
+    gameSocket.emit(
+      "game_option",
+      {
+        gameType: gameState.gameMode,
+        userIdx: authState.id,
+        speed: selectedSpeedOption,
+        mapNumber: selectedMapOption,
+      },
+      (res: { code: number; msg: string }) => {
+        if (res.code === 200) {
+          console.log("queue regist start");
+
+          if (gameState.gameMode === GameType.FRIEND) {
+            console.log("친구게임");
+            setTimeout(() => {
+              router.replace("./inwaiting");
+            }, 300);
+            return;
+          }
+
+          gameSocket.emit(
+            "game_queue_regist",
+            {
+              userIdx: authState.id,
+              queueDate: Date.now(),
+            },
+            (res: { code: number; msg: string }) => {
+              console.log(res);
+              if (res.code === 200) {
+                setTimeout(() => {
+                  router.replace("./inwaiting");
+                }, 300);
+              }
+            }
+          );
+        }
+      }
+    );
   };
+
+  useEffect(() => {
+    setClient(true);
+    gameSocket.connect();
+  }, []);
+
+  if (!client) return <></>;
 
   return (
     <Card sx={{ display: "flex" }}>
@@ -62,7 +163,7 @@ const OptionSelect = () => {
         sx={{
           width: "100%",
           height: "100vh",
-          backgroundColor: main.main1,
+          backgroundImage: `url("/background.png")`,
           padding: 0,
           margin: 0,
         }}
@@ -86,7 +187,7 @@ const OptionSelect = () => {
               backgroundColor: "White",
             }}
             onClick={() => {
-              router.push("./game");
+              router.replace("/?from=game");
             }}
           >
             이전화면으로 돌아가기
@@ -163,7 +264,7 @@ const OptionSelect = () => {
                 {/* 속도체크박스 */}
                 <FormControlLabel
                   disabled={
-                    selectedSpeedOption === "speed1"
+                    selectedSpeedOption === SpeedOption.speed1
                       ? true
                       : false || countdown == 0
                       ? true
@@ -171,16 +272,18 @@ const OptionSelect = () => {
                   }
                   control={
                     <Checkbox
-                      checked={selectedSpeedOption === "speed1"}
+                      checked={selectedSpeedOption === SpeedOption.speed1}
                       sx={{ "& .MuiSvgIcon-root": { fontSize: "3rem" } }}
-                      onChange={() => handleSpeedOptionChange("speed1")}
+                      onChange={() =>
+                        handleSpeedOptionChange(SpeedOption.speed1)
+                      }
                     />
                   }
                   label="Slow"
                 />
                 <FormControlLabel
                   disabled={
-                    selectedSpeedOption === "speed2"
+                    selectedSpeedOption === SpeedOption.speed2
                       ? true
                       : false || countdown == 0
                       ? true
@@ -188,16 +291,18 @@ const OptionSelect = () => {
                   }
                   control={
                     <Checkbox
-                      checked={selectedSpeedOption === "speed2"}
+                      checked={selectedSpeedOption === SpeedOption.speed2}
                       sx={{ "& .MuiSvgIcon-root": { fontSize: "3rem" } }}
-                      onChange={() => handleSpeedOptionChange("speed2")}
+                      onChange={() =>
+                        handleSpeedOptionChange(SpeedOption.speed2)
+                      }
                     />
                   }
                   label="Normal"
                 />
                 <FormControlLabel
                   disabled={
-                    selectedSpeedOption === "speed3"
+                    selectedSpeedOption === SpeedOption.speed3
                       ? true
                       : false || countdown == 0
                       ? true
@@ -205,9 +310,11 @@ const OptionSelect = () => {
                   }
                   control={
                     <Checkbox
-                      checked={selectedSpeedOption === "speed3"}
+                      checked={selectedSpeedOption === SpeedOption.speed3}
                       sx={{ "& .MuiSvgIcon-root": { fontSize: "3rem" } }}
-                      onChange={() => handleSpeedOptionChange("speed3")}
+                      onChange={() =>
+                        handleSpeedOptionChange(SpeedOption.speed3)
+                      }
                     />
                   }
                   label="Fast"
@@ -252,7 +359,7 @@ const OptionSelect = () => {
                 {/* 맵옵션 버튼 들어갈 자리 */}
                 <FormControlLabel
                   disabled={
-                    selectedMapOption === "map1"
+                    selectedMapOption === MapOption.map1
                       ? true
                       : false || countdown == 0
                       ? true
@@ -260,16 +367,16 @@ const OptionSelect = () => {
                   }
                   control={
                     <Checkbox
-                      checked={selectedMapOption === "map1"}
+                      checked={selectedMapOption === MapOption.map1}
                       sx={{ "& .MuiSvgIcon-root": { fontSize: "3rem" } }}
-                      onChange={() => handleMapOptionChange("map1")}
+                      onChange={() => handleMapOptionChange(MapOption.map1)}
                     />
                   }
                   label="Map1"
                 />
                 <FormControlLabel
                   disabled={
-                    selectedMapOption === "map2"
+                    selectedMapOption === MapOption.map2
                       ? true
                       : false || countdown == 0
                       ? true
@@ -277,16 +384,16 @@ const OptionSelect = () => {
                   }
                   control={
                     <Checkbox
-                      checked={selectedMapOption === "map2"}
+                      checked={selectedMapOption === MapOption.map2}
                       sx={{ "& .MuiSvgIcon-root": { fontSize: "3rem" } }}
-                      onChange={() => handleMapOptionChange("map2")}
+                      onChange={() => handleMapOptionChange(MapOption.map2)}
                     />
                   }
                   label="Map2"
                 />
                 <FormControlLabel
                   disabled={
-                    selectedMapOption === "map3"
+                    selectedMapOption === MapOption.map3
                       ? true
                       : false || countdown == 0
                       ? true
@@ -294,9 +401,9 @@ const OptionSelect = () => {
                   }
                   control={
                     <Checkbox
-                      checked={selectedMapOption === "map3"}
+                      checked={selectedMapOption === MapOption.map3}
                       sx={{ "& .MuiSvgIcon-root": { fontSize: "3rem" } }}
-                      onChange={() => handleMapOptionChange("map3")}
+                      onChange={() => handleMapOptionChange(MapOption.map3)}
                     />
                   }
                   label="Map3"

@@ -1,30 +1,27 @@
 "use client";
 
-import { CardContent, Stack, Box, Button } from "@mui/material";
+import { CardContent, Stack, Box } from "@mui/material";
 import FriendList from "../main/friend_list/FriendList";
 import RoomList from "../main/room_list/RoomList";
 import ChatWindow from "../main/chat_window/ChatWindow";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import Myprofile from "../main/myprofile/MyProfile";
 import GameStartButton from "../game/GameStartButton";
-import io from "socket.io-client";
-import InviteGame from "../main/InviteGame/InviteGame";
-import WaitAccept from "../main/InviteGame/WaitAccept";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRoom } from "@/context/RoomContext";
-import { UserProvider, useUser } from "@/context/UserContext";
+import { useUser } from "@/context/UserContext";
 import { useFriend } from "@/context/FriendContext";
 import { socket } from "@/app/page";
 import { IMaindata } from "@/type/type";
+import { ReturnMsgDto } from "@/type/RoomType";
+
 
 const Layout = () => {
-  const { state } = useAuth();
+  const { authState } = useAuth();
   const { roomState, roomDispatch } = useRoom();
   const { friendState, friendDispatch } = useFriend();
   const { userState, userDispatch } = useUser();
-
-  useRequireAuth();
 
   useEffect(() => {
     const MainEnter = (data: IMaindata) => {
@@ -45,21 +42,16 @@ const Layout = () => {
       socket.off("main_enter", MainEnter);
     };
   }, []);
-  //socket에서 값을 받아와도 dispatch 하는 시간동안 값은 비어있으므로 내부에서 값을 찍어도 안나옴.
-  //미세한 찰나일 것임.!
-
   useEffect(() => {
-    if (localStorage.getItem("loggedIn")) {
-      console.log(userState.nickname);
-      socket.emit(
-        "main_enter",
-        JSON.stringify({ intra: localStorage.getItem("intra") }),
-        (ret: number) => {
-          if (ret === 200) {
-          }
+    console.log(userState.nickname);
+    socket.emit(
+      "main_enter",
+      { intra: localStorage.getItem("intra") },
+      (ret: ReturnMsgDto) => {
+        if (ret.code === 200) {
         }
-      );
-    }
+      }
+    );
   }, []);
 
   return (

@@ -13,7 +13,7 @@ import {
 import { main } from "@/type/type";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGame } from "@/context/GameContext";
 
 const infomodalStyle = {
@@ -29,23 +29,30 @@ const infomodalStyle = {
   p: 4,
 };
 
+enum GameType {
+  FRIEND,
+  NORMAL,
+  RANK,
+}
+
 const Game = () => {
   const router = useRouter();
-  const { state, dispatch } = useGame();
+  const { gameState, gameDispatch } = useGame();
   const [openModal, setOpenModal] = useState<boolean>(false);
+  const [client, setClient] = useState<boolean>(false);
 
   const ClickNomalGame = () => {
-    dispatch({ type: "SET_GAME_MODE", value: "normal" });
-    router.push("./optionselect");
+    gameDispatch({ type: "SET_GAME_MODE", value: GameType.NORMAL });
+    router.replace("/optionselect");
   };
 
   const ClickRankGame = () => {
-    dispatch({ type: "SET_GAME_MODE", value: "rank" });
-    router.push("./inwaiting");
+    gameDispatch({ type: "SET_GAME_MODE", value: GameType.RANK });
+    router.replace("/inwaiting");
   };
 
   const BackToMain = () => {
-    router.push("/");
+    router.replace("/");
   };
 
   const handleOpenModal = () => {
@@ -55,13 +62,20 @@ const Game = () => {
   const handleCloseModal = () => {
     setOpenModal(false);
   };
+
+  useEffect(() => {
+    setClient(true);
+  }, []);
+
+  if (!client) return <></>;
+
   return (
     <Card sx={{ display: "flex" }}>
       <Stack
         sx={{
+          backgroundImage: `url("/background.png")`,
           width: "100%",
           height: "100vh",
-          backgroundColor: main.main1,
           padding: 0,
           margin: 0,
         }}
@@ -159,7 +173,10 @@ const Game = () => {
                           border: "1px solid black",
                         }}
                       >
-                        설명이들어가야하는데뭘적어야할지모르겠어요
+                        <strong>일반 게임</strong>은 랭크 점수를 걸지 않고
+                        상대와 겨루는 모드입니다. 이 모드에선 공의 스피드와 맵의
+                        종류를 직접 고를 수 있고 각 옵션은 상대의 선택와
+                        플레이어의 선택 중 랜덤으로 적용됩니다.
                       </Card>
                     </CardContent>
 
@@ -197,7 +214,11 @@ const Game = () => {
                           border: "1px solid black",
                         }}
                       >
-                        설명이들어가야하는데뭘적어야할지모르겠어요
+                        <Typography>
+                          <strong>랭크게임</strong>은 자신의 랭크 점수를 걸고
+                          상대와 겨루는 모드입니다. 이 모드는 보통 공 속도와
+                          기본 맵를 사용합니다.
+                        </Typography>
                       </Card>
                     </CardContent>
 

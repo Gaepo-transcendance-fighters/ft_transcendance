@@ -14,7 +14,7 @@ import { BlockInfoDto, BlockTargetDto } from './dto/block-target.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { BlockListRepository } from './blockList.repository';
 import { FriendListRepository } from './friendList.repository';
-import { FollowFriendDto, FriendResDto } from './dto/friend.dto';
+import { FollowFriendDto, FriendListResDto } from './dto/friend.dto';
 import axios from 'axios';
 import { response } from 'express';
 import {
@@ -73,19 +73,47 @@ export class UsersService {
     } else { return false; } // 닉네임이 이미 존재한다면
   }
 
-  async updateImgFile(filepath: string, filename: string, imgData: any) {
+  private async createDirectoryIfNotExists(dirPath) {
+    try {
+      await fs.mkdir(dirPath, { recursive: true });
+      console.log('Directory created successfully:', dirPath);
+    } catch (error) {
+      console.error('Error creating directory:', error);
+    }
+  }
+
+  private async checkFileExists(filePath) {
+    try {
+      await fs.access(filePath);
+      console.log('File exists:', filePath);
+      return true;
+    } catch (error) {
+      console.log('File does not exist:', filePath);
+      return false;
+    }
+  }
+
+
+
+  async updateImgFile(filepath: string, filename: string, imgData: string) {
     if (imgData === '') return;
-
     // imgUri를 저장할 경로를 만들고 그 안에 이미지 파일을 생성해야 함.
-
     const base64 = imgData.replace(/^data:image\/\w+;base64,/, '');
     const buffer = Buffer.from(base64, 'base64');
     const fileExtension = 'png'; // 이미지 데이터의 확장자 동적으로 결정
 
-    const filePath = `${filepath}/${filename}.${fileExtension}`;
+    const completeFilePath = `${filepath}/${filename}.${fileExtension}`; // 완전한 파일 경로 생성
+    const fileExists = await this.checkFileExists(completeFilePath);
+  
+    if (fileExists) {
+      await fs.unlink(completeFilePath); // 파일이 존재한다면 삭제
+    }
+
+    const directoryPath = 'public/img';
+    await this.createDirectoryIfNotExists(directoryPath);
 
     try {
-      await fs.writeFile(filePath, buffer); // 비동기적으로 파일 저장
+      await fs.writeFile(completeFilePath, buffer); // 비동기적으로 파일 저장
     } catch (error) {
       console.error('Error saving image:', error);
       throw new Error('Failed to save image');
@@ -97,16 +125,19 @@ export class UsersService {
   */
   async updateUser(userEditImgDto: UserEditprofileDto): Promise<any> {
     const { userIdx, userNickname, imgData } = userEditImgDto;
+  
     const user = await this.findOneUser(userIdx);
-    await this.updateImgFile(`public/img`, `${userIdx}`, imgData); // 이미지 파일 비동기 저장
     if (userNickname !== '') {
       user.nickname = userNickname;
+      try {
+        await this.updateUserNick({ userIdx, userNickname: userNickname, imgData: user.imgUri });
+      } catch (err) {
+        throw new HttpException('update user error', HttpStatus.FORBIDDEN);
+      }
+    } else {
+      await this.updateImgFile(`public/img`, `${userIdx}`, imgData); // 이미지 파일 비동기 저장
     }
-    try {
-      await this.updateUserNick({ userIdx, userNickname: userNickname, imgData: user.imgUri });
-    } catch (err) {
-      throw new HttpException('update user error', HttpStatus.FORBIDDEN);
-    }
+    
     return user;
   }
   
@@ -197,16 +228,32 @@ export class UsersService {
   async findUserByIntra(intra: string): Promise<UserObject> {
     return this.userObjectRepository.findOne({ where: { intra: intra } });
   }
-
+   /*
+    export class FriendListResDto {
+      FriendDto[] {
+        frindNickname : string;
+        friendIdx : number;
+        isOnline : boolean;
+      },,,{}
+    } 
+  */
   async addFriend(
     insertFriendDto: FollowFriendDto,
     user: UserObject,
-  ): Promise<FriendList[]> {
-    return this.friendListRepository.insertFriend(
+  ): Promise<FriendListResDto> {
+    const target = await this.userObjectRepository.findOneBy({userIdx: insertFriendDto.targetIdx});
+    const list = await this.friendListRepository.insertFriend(
       insertFriendDto,
       user,
       this.userObjectRepository,
     );
+    const updatedList: FriendListResDto = list.map((res) => ({
+      friendNickname: res.friendNickname,
+      friendIdx: res.friendIdx,
+      isOnline: target.isOnline, // 여기서 user.isOnline 값을 추가
+    }));
+    return updatedList;
+    
   }
 
   async deleteFriend(
@@ -227,7 +274,7 @@ export class UsersService {
       userIdx: userIdx,
       intra: intra,
       nickname: intra,
-      imgUri: imgUri,
+      imgUri: `http://localhost:4000/img/${userIdx}.png`,
       rankpoint: 0,
       isOnline: OnlineStatus.ONLINE,
       available: true,
@@ -242,7 +289,7 @@ export class UsersService {
   
   async validateUser(intraInfo: IntraInfoDto): Promise<IntraSimpleInfoDto> {
     let user = await this.createUser(intraInfo);
-    return new IntraSimpleInfoDto(user.userIdx, user.imgUri, false);
+    return new IntraSimpleInfoDto(user.userIdx, user.imgUri, user.check2Auth);
   }
 
   async getAllUsersFromDB(): Promise<UserObject[]> {
@@ -263,7 +310,7 @@ export class UsersService {
 
   async getFriendList(
     intra: string,
-  ): Promise<{ friendNicname: string; isOnline: OnlineStatus }[]> {
+  ): Promise<{ friendNickname: string; friendIdx: number; isOnline: OnlineStatus }[]> {
     const user: UserObject = await this.userObjectRepository.findOne({
       where: { intra: intra },
     });
@@ -326,7 +373,7 @@ export class UsersService {
     userIdx: number,
     patchAuthDto: TFAuthDto,
   ): Promise<TFAUserDto> {
-    const auth = await this.certificateRepository.findOneBy({ userIdx });
+    const auth = await this.userObjectRepository.findOneBy({ userIdx });
     const { code } = patchAuthDto;
     console.log(this.mailCodeList, code);
 
@@ -337,7 +384,7 @@ export class UsersService {
       if (auth.check2Auth === true) return { checkTFA: true };
     }
     auth.check2Auth = !auth.check2Auth;
-    const certi = await this.certificateRepository.save(auth);
-    return { checkTFA: certi.check2Auth };
+    const user = await this.userObjectRepository.save(auth);
+    return { checkTFA: user.check2Auth };
   }
 }

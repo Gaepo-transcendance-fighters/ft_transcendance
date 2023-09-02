@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export const useRequireAuth = (redirectUrl: string = "/login") => {
-  const { state } = useAuth();
+  const { authState } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     const localData = localStorage.getItem("loggedIn");
     if (localData === "true") return router.push("/");
 
-    if (!state.isLoggedIn) router.push(redirectUrl);
+    if (!authState.isLoggedIn) router.push(redirectUrl);
   }, []);
 };

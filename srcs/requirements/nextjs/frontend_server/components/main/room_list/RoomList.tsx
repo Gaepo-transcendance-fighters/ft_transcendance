@@ -1,10 +1,20 @@
 "use client";
 
-import { Card, CardContent } from "@mui/material";
+import { Card, CardContent, styled } from "@mui/material";
 import Title from "./Title";
 import RoomTypeButton from "./RoomTypeButton";
 import { main } from "@/font/color";
 import { useRoom } from "@/context/RoomContext";
+
+const openStyle = {
+  "&:last-child": { pb: 0 },
+  backgroundColor: main.main2,
+};
+
+const closeStyle = {
+  "&:last-child": { p: 0 },
+  backgroundColor: main.main2,
+};
 
 export default function RoomList() {
   const { roomState } = useRoom();
@@ -14,7 +24,7 @@ export default function RoomList() {
       <Card sx={{ margin: 1, borderRadius: "10px" }}>
         <CardContent
           id="portal"
-          sx={{ "&:last-child": { pb: 0 }, backgroundColor: main.main2 }}
+          sx={roomState.isOpen ? openStyle : closeStyle}
           className={roomState.isOpen ? "memactivate" : "memdeactivate"}
         ></CardContent>
       </Card>

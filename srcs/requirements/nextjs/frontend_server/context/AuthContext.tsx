@@ -56,11 +56,11 @@ const AuthReducer = (state: AuthContextData, action: AuthAction) => {
 };
 
 const AuthContext = createContext<{
-  state: AuthContextData;
-  dispatch: React.Dispatch<AuthAction>;
+  authState: AuthContextData;
+  authDispatch: React.Dispatch<AuthAction>;
 }>({
-  state: initialState,
-  dispatch: () => {},
+  authState: initialState,
+  authDispatch: () => {},
 });
 
 export const useAuth = () => {
@@ -68,18 +68,18 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(AuthReducer, initialState);
+  const [authState, authDispatch] = useReducer(AuthReducer, initialState);
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("loggedIn");
 
     if (loggedIn === "true") {
-      dispatch({ type: "LOGIN", value: true });
+      authDispatch({ type: "LOGIN", value: true });
     }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ state, dispatch }}>
+    <AuthContext.Provider value={{ authState, authDispatch }}>
       {children}
     </AuthContext.Provider>
   );
