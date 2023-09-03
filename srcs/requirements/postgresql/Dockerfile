@@ -1,10 +1,7 @@
 FROM debian:bullseye
 
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y && \
-    apt-get install -y dumb-init && \
-    apt install -y postgresql-13 vim
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y dumb-init postgresql-13 vim
 
 COPY ./tools/database.sh ./tmp
 COPY ./config/pg_hba.conf ./etc/postgresql/13/main/pg_hba.conf
@@ -16,5 +13,4 @@ RUN chmod +x ./database.sh
 
 EXPOSE 5432
 
-# ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["./database.sh"]
