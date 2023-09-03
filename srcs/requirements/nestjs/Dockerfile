@@ -1,15 +1,9 @@
 FROM debian:bullseye
 
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y && \
-    apt-get install -y curl && \
-    apt install -y vim && \
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y curl vim sudo telnet ufw && \
     curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-    apt install sudo && \
-    apt-get install -y nodejs && \
-    apt install -y telnet && \
-    apt install -y ufw
+    apt-get install -y nodejs
 
 COPY backend_server /app/backend_server
 
