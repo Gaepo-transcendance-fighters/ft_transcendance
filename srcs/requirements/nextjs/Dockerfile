@@ -1,16 +1,11 @@
 FROM debian:bullseye
 
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y && \
-    apt-get install -y build-essential && \
-    apt-get install -y curl && \
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y build-essential curl vim && \
     curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-    apt install -y vim && \
-    apt-get install -y nodejs && \
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash && \
-    npm install -g n && \
-    n latest
+    apt-get install -y nodejs && \
+    npm install -g n && n latest
 
 COPY frontend_server /app/frontend_server
 
