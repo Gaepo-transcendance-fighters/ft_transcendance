@@ -6,6 +6,7 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y nodejs
 
 COPY backend_server /app/backend_server
+COPY config /app/backend_server/config
 
 WORKDIR /app/backend_server
 

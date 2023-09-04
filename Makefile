@@ -1,11 +1,10 @@
 NAME = Transcendance
 
-# # VOLUME_PATH :=  /home/jaekim/data
-# RED			=	\033[0;31m
-# GRN			= 	\033[0;32m
-# YLW			=	\033[0;33m
-# BLU			= 	\033[0;36m
-# DFT			= 	\033[0;37m
+RED			=	\033[0;31m
+GRN			= 	\033[0;32m
+YLW			=	\033[0;33m
+BLU			= 	\033[0;36m
+DFT			= 	\033[0;37m
 
 # all: fclean up
 
@@ -19,17 +18,10 @@ down:
 
 image:
 	@docker pull debian:bullseye
+	@echo "$(GRN)>>> docker image download$(DFT)"
 
-clean:
+clean: down
 	@docker system prune -af
-# clean: 
-# 	@docker-compose -f ./srcs/docker-compose.yml down --rmi all --volumes
-# 	@echo "$(RED)>>> docker stop and remove volume, networks and caches$(DFT)"
+	@echo "$(RED)>>> docker stop and remove networks and caches$(DFT)"
 
-# fclean: clean
-# 	@rm -rf $(VOLUME_PATH)/mariadb
-# 	@rm -rf $(VOLUME_PATH)/wordpress
-# 	@echo "$(RED)>>> remove your volume files$(DFT)"
-# # remove files from the volumes (you need to fill it)
-
-# .PHONY: up down clean fclean
+.PHONY: up down clean fclean

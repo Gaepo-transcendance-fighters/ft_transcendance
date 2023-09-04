@@ -27,19 +27,6 @@ services:
             - nestjs
         networks:
             - transcendance_network
-            
-# nginx:
-#   build: requirements/nginx
-#   image: nginx:latest
-#   container_name: nginx
-#   ports:
-#     - 443:443
-#   restart: always
-#   depends_on:
-#     - nestjs
-#     - nextjs
-#   networks:
-#     - transcendance_network
 
 networks:
     transcendance_network:
