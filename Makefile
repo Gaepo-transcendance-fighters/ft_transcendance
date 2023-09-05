@@ -12,7 +12,7 @@ up: clone
 	@docker-compose -f ./srcs/docker-compose.yml up --build -d;
 	@echo "$(GRN)>>> docker compose up$(DFT)"
 
-down:
+down: rm
 	@docker-compose -f ./srcs/docker-compose.yml down;
 	@echo "$(YLW)>>> docker compose down$(DFT)"
 
