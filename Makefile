@@ -8,7 +8,7 @@ DFT			= 	\033[0;37m
 
 # all: fclean up
 
-up:
+up: clone
 	@docker-compose -f ./srcs/docker-compose.yml up --build -d;
 	@echo "$(GRN)>>> docker compose up$(DFT)"
 
@@ -22,7 +22,11 @@ image:
 
 clone:
 	@git clone https://github.com/Gaepo-transcendance-fighters/BACK-END.git ./srcs/requirements/nestjs/backend_server
-	@git clone https://github.com/Gaepo-transcendance-fighters/FRONT-END.git ./srcs/requirements/nestjs/frontend
+	@git clone https://github.com/Gaepo-transcendance-fighters/FRONT-END.git ./srcs/requirements/nextjs/frontend
+
+rm:
+	@sudo rm -rf ./srcs/requirements/nestjs/backend_server
+	@sudo rm -rf ./srcs/requirements/nextjs/frontend
 
 clean: down
 	@docker system prune -af
