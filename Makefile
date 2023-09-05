@@ -20,6 +20,10 @@ image:
 	@docker pull debian:bullseye
 	@echo "$(GRN)>>> docker image download$(DFT)"
 
+clone:
+	@git clone https://github.com/Gaepo-transcendance-fighters/BACK-END.git ./srcs/requirements/nestjs/backend_server
+	@git clone https://github.com/Gaepo-transcendance-fighters/FRONT-END.git ./srcs/requirements/nestjs/frontend
+
 clean: down
 	@docker system prune -af
 	@echo "$(RED)>>> docker stop and remove networks and caches$(DFT)"
