@@ -8,7 +8,7 @@ RUN apt-get update && apt-get upgrade -y && \
     npm install -g n && n latest
 
 COPY frontend/frontend /app/frontend_server
-COPY .env /app/frontend_server
+# COPY .env /app/frontend_server
 
 WORKDIR /app/frontend_server
 

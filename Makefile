@@ -9,7 +9,7 @@ DFT			= 	\033[0;37m
 # all: fclean up
 
 up: clone
-	@docker-compose -f ./srcs/docker-compose.yml up --build -d;
+	@docker-compose -f ./srcs/docker-compose.yml up --build;
 	@echo "$(GRN)>>> docker compose up$(DFT)"
 
 down: rm
@@ -21,8 +21,8 @@ image:
 	@echo "$(GRN)>>> docker image download$(DFT)"
 
 clone:
-	@git clone https://github.com/Gaepo-transcendance-fighters/BACK-END.git ./srcs/requirements/nestjs/backend_server
-	@git clone https://github.com/Gaepo-transcendance-fighters/FRONT-END.git ./srcs/requirements/nextjs/frontend
+	@git clone https://github.com/Gaepo-transcendance-fighters/BACK-END.git ./srcs/requirements/nestjs/backend_server 2> /dev/null || true
+	@git clone https://github.com/Gaepo-transcendance-fighters/FRONT-END.git ./srcs/requirements/nextjs/frontend 2> /dev/null || true
 
 rm:
 	@sudo rm -rf ./srcs/requirements/nestjs/backend_server

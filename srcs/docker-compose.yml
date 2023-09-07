@@ -1,34 +1,36 @@
 version: "3.8"
 
 services:
-    postgresql:
-        build: requirements/postgresql/
-        container_name: postgresql
-        restart: always
-        networks:
-            - transcendance_network
+  postgresql:
+    build: requirements/postgresql/
+    container_name: postgresql
+    restart: always
+    networks:
+      - transcendance_network
 
-    nestjs:
-        build: requirements/nestjs
-        container_name: nestjs
-        ports:
-            - "4000:4000"
-        depends_on:
-            - postgresql
-        networks:
-            - transcendance_network
+  nestjs:
+    build: requirements/nestjs
+    container_name: nestjs
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgresql
+    networks:
+      - transcendance_network
 
-    nextjs:
-        build: requirements/nextjs
-        container_name: nextjs
-        ports:
-            - "3000:3000"
-        depends_on:
-            - nestjs
-        networks:
-            - transcendance_network
+  nextjs:
+    build: requirements/nextjs
+    container_name: nextjs
+    ports:
+      - "3000:3000"
+    depends_on:
+      - nestjs
+    networks:
+      - transcendance_network
+    env_file:
+      - ./.env
 
 networks:
-    transcendance_network:
-        name: transcendance_network
-        driver: bridge
+  transcendance_network:
+    name: transcendance_network
+    driver: bridge
