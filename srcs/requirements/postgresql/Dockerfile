@@ -5,7 +5,7 @@ FROM postgres:13
 ENV POSTGRES_PASSWORD ${RDS_PASSWORD}
 
 # Create a new database
-ENV POSTGRES_DB {RDS_DB_NAME}
+ENV POSTGRES_DB ${RDS_DB_NAME}
 
 COPY ./tools/database.sh ./tmp/database.sh
 COPY ./config/pg_hba.conf ./etc/postgresql/13/main/pg_hba.conf

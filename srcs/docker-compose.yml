@@ -1,15 +1,15 @@
-
 version: '3'
 services:
   postgresql:
-    build: requirements/postgresql
-    restart: always
+    image: postgres:13
     environment:
-      - POSTGRES_USER=${RDS_USERNAME}
-      - POSTGRES_PASSWORD=${RDS_PASSWORD}
-      - POSTGRES_DB=${RDS_DB_NAME}
+      POSTGRES_USER: $RDS_USERNAME
+      POSTGRES_PASSWORD: $RDS_PASSWORD
+      POSTGRES_DB: $RDS_DB_NAME
+    network_mode: "host"
     ports:
       - "5432:5432"
+    
 
   nestjs:
     build: requirements/nestjs
@@ -20,8 +20,8 @@ services:
     container_name: nestjs
     depends_on:
       - postgresql
-    
-    
+
+
 
   nextjs:
     build: requirements/nextjs
@@ -96,8 +96,3 @@ services:
 #             - nestjs
 #         networks:
 #             - transcendance_network
-
-# networks:
-#     transcendance_network:
-#         name: transcendance_network
-#         driver: bridge
