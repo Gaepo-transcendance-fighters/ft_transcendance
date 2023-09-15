@@ -17,14 +17,15 @@ down: rm
 	@echo "$(YLW)>>> docker compose down$(DFT)"
 
 image:
-	@docker pull debian:bullseye
+	@docker pull node:lts
 	@echo "$(GRN)>>> docker image download$(DFT)"
 
 clone:
-	@git clone https://github.com/Gaepo-transcendance-fighters/BACK-END.git ./srcs/requirements/nestjs/backend_server
-	@git clone https://github.com/Gaepo-transcendance-fighters/FRONT-END.git ./srcs/requirements/nextjs/frontend
+	@git clone https://github.com/Gaepo-transcendance-fighters/BACK-END.git ./srcs/requirements/nestjs/backend_server 2> /dev/null || true
+	@git clone https://github.com/Gaepo-transcendance-fighters/FRONT-END.git ./srcs/requirements/nextjs/frontend 2> /dev/null || true
 
 rm:
+	@docker-compose -f ./srcs/docker-compose.yml down --volumes --remove-orphans
 	@sudo rm -rf ./srcs/requirements/nestjs/backend_server
 	@sudo rm -rf ./srcs/requirements/nextjs/frontend
 
@@ -32,4 +33,4 @@ clean: down
 	@docker system prune -af
 	@echo "$(RED)>>> docker stop and remove networks and caches$(DFT)"
 
-.PHONY: up down clean fclean
+.PHONY: up down clean
