@@ -6,20 +6,21 @@ services:
       POSTGRES_USER: $RDS_USERNAME
       POSTGRES_PASSWORD: $RDS_PASSWORD
       POSTGRES_DB: $RDS_DB_NAME
-    network_mode: "host"
     ports:
       - "5432:5432"
-    
 
   nestjs:
     build: requirements/nestjs
-    env_file:
-      - ./requirements/nestjs/backend_server/backend_server/.env
+    environment:
+      DATABASE_HOST: postgresql  # PostgreSQL 컨테이너의 이름
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: $RDS_USERNAME
+      DATABASE_PASSWORD: $RDS_PASSWORD
+      DATABASE_NAME: $RDS_DB_NAME
     ports:
       - "4000:4000"
-    container_name: nestjs
     depends_on:
-      - postgresql
+      - postgresql 
 
 
 
