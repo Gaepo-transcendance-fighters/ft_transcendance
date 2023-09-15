@@ -23,6 +23,9 @@ image:
 clone:
 	@git clone https://github.com/Gaepo-transcendance-fighters/BACK-END.git ./srcs/requirements/nestjs/backend_server 2> /dev/null || true
 	@git clone https://github.com/Gaepo-transcendance-fighters/FRONT-END.git ./srcs/requirements/nextjs/frontend 2> /dev/null || true
+	cp ./srcs/.env ./srcs/requirements/nestjs/backend_server/backend_server
+	cp ./srcs/.env ./srcs/requirements/nextjs/frontend/frontend
+
 
 rm:
 	@docker-compose -f ./srcs/docker-compose.yml down --volumes --remove-orphans
