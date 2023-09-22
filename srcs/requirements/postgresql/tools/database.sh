@@ -5,10 +5,10 @@ service postgresql start
 
 # 데이터베이스 사용자 비밀번호 및 권한 설정
 su - postgres -c "psql -c \"alter user postgres with password 'postgres';\""
-su - postgres -c "psql -c \"CREATE DATABASE pingpong8 WITH OWNER postgres;\""
+su - postgres -c "psql -c \"CREATE DATABASE pingpong WITH OWNER postgres;\""
 
 # 데이터베이스 생성
-su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE pingpong8 TO postgres;\""
+su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE pingpong TO postgres;\""
 
 #!/bin/bash
 
@@ -25,7 +25,7 @@ DB_NAME=$RDS_DB_NAME
 # 데이터베이스 생성 명령어 실행
 echo "Database $DB_NAME creating ready."
 echo "$HOST , $PORT , $DB_USER , $DB_NAME"
-createdb -h localhost -p 5432 -U postgres pingpong8
+createdb -h localhost -p 5432 -U postgres pingpong
 
 # 생성된 데이터베이스 확인
 echo "Database $DB_NAME has been created."
@@ -57,7 +57,7 @@ tail -f /dev/null
 # su - postgres -c "psql -c \"CREATE DATABASE pingpong WITH OWNER postgres;\""
 
 # # 데이터베이스 생성
-# su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE pingpong8 TO postgres;\""
+# su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE pingpong TO postgres;\""
 
 # #!/bin/bash
 
