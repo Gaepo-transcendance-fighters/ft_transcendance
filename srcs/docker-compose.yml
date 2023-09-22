@@ -1,0 +1,35 @@
+version: '3'
+services:
+  postgresql:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: $RDS_USERNAME
+      POSTGRES_PASSWORD: $RDS_PASSWORD
+      POSTGRES_DB: $RDS_DB_NAME
+    ports:
+      - "5432:5432"
+
+  nestjs:
+    build: requirements/nestjs
+    environment:
+      DATABASE_HOST: postgresql  # PostgreSQL 컨테이너의 이름
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: $RDS_USERNAME
+      DATABASE_PASSWORD: $RDS_PASSWORD
+      DATABASE_NAME: $RDS_DB_NAME
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgresql 
+
+
+
+  nextjs:
+    build: requirements/nextjs
+    env_file:
+      - ./requirements/nextjs/frontend/frontend/.env
+    ports:
+      - "3000:3000"
+    container_name: nextjs
+    depends_on:
+      - nestjs

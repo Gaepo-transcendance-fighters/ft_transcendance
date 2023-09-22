@@ -1,0 +1,24 @@
+server:
+  port: 4000
+
+db:
+  type: 'postgres'
+  port: 5432
+  database: 'pingpong'
+
+jwt:
+  expiresIn: 3600
+
+auth:
+  clientid: 'u-s4t2ud-e0907298df98549b10702547b5b92206cada3f2c9aa3a0af07c0920c8ee3501b'
+  clientsecret: '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'
+  frontcallbackuri: 'http://localhost:3000/login/auth'
+  redirecturi: 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-e0907298df98549b10702547b5b92206cada3f2c9aa3a0af07c0920c8ee3501b&redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Flogin%2Fauth&response_type=code'
+  callbackuri: 'http://localhost:4000/login/auth'
+  fronturi: 'http://localhost:3000'
+  frontredirecturi: 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-e0907298df98549b10702547b5b92206cada3f2c9aa3a0af07c0920c8ee3501b&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Flogin%2Fauth&response_type=code'
+  secret: 'Secret1234'
+
+mail:
+  userid: 'noreply42seoul@gmail.com'
+  password: 'mwfgrsngogcfuvzn'
