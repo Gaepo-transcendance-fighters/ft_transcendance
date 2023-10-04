@@ -10,7 +10,7 @@ services:
       - "5432:5432"
 
   nestjs:
-    build: requirements/nestjs
+    build: srcs/requirements/nestjs
     environment:
       DATABASE_HOST: postgresql  # PostgreSQL 컨테이너의 이름
       DATABASE_PORT: 5432
@@ -25,9 +25,9 @@ services:
 
 
   nextjs:
-    build: requirements/nextjs
+    build: srcs/requirements/nextjs
     env_file:
-      - ./requirements/nextjs/frontend/frontend/.env
+      - ./srcs/requirements/nextjs/frontend/frontend/.env
     ports:
       - "3000:3000"
     container_name: nextjs

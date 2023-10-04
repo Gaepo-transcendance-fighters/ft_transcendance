@@ -9,11 +9,11 @@ DFT			= 	\033[0;37m
 # all: fclean up
 
 up: clone
-	@docker-compose -f ./srcs/docker-compose.yml up --build -d;
+	@docker-compose -f ./docker-compose.yml up --build -d;
 	@echo "$(GRN)>>> docker compose up$(DFT)"
 
 down: rm
-	@docker-compose -f ./srcs/docker-compose.yml down;
+	@docker-compose -f ./docker-compose.yml down;
 	@echo "$(YLW)>>> docker compose down$(DFT)"
 
 image:
@@ -23,14 +23,14 @@ image:
 clone:
 	@git clone https://github.com/Gaepo-transcendance-fighters/BACK-END.git ./srcs/requirements/nestjs/backend_server 2> /dev/null || true
 	@git clone https://github.com/Gaepo-transcendance-fighters/FRONT-END.git ./srcs/requirements/nextjs/frontend 2> /dev/null || true
-	cp ./srcs/.env ./srcs/requirements/nestjs/backend_server/backend_server
-	cp ./srcs/.env ./srcs/requirements/nextjs/frontend/frontend
+	cp ./.env ./srcs/requirements/nestjs/backend_server/backend_server
+	cp ./.env ./srcs/requirements/nextjs/frontend/frontend
 
 
 rm:
-	@docker-compose -f ./srcs/docker-compose.yml down --volumes --remove-orphans
-	@sudo rm -rf ./srcs/requirements/nestjs/backend_server
-	@sudo rm -rf ./srcs/requirements/nextjs/frontend
+	@docker-compose -f ./docker-compose.yml down --volumes --remove-orphans
+	rm -rf ./srcs/requirements/nestjs/backend_server
+	rm -rf ./srcs/requirements/nextjs/frontend
 
 clean: down
 	@docker system prune -af
