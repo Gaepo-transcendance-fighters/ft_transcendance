@@ -21,16 +21,12 @@ image:
 	@echo "$(GRN)>>> docker image download$(DFT)"
 
 clone:
-	@git clone https://github.com/Gaepo-transcendance-fighters/BACK-END.git ./srcs/requirements/nestjs/backend_server 2> /dev/null || true
-	@git clone https://github.com/Gaepo-transcendance-fighters/FRONT-END.git ./srcs/requirements/nextjs/frontend 2> /dev/null || true
 	cp ./.env ./srcs/requirements/nestjs/backend_server/backend_server
 	cp ./.env ./srcs/requirements/nextjs/frontend/frontend
 
 
 rm:
 	@docker-compose -f ./docker-compose.yml down --volumes --remove-orphans
-	rm -rf ./srcs/requirements/nestjs/backend_server
-	rm -rf ./srcs/requirements/nextjs/frontend
 
 clean: down
 	@docker system prune -af
