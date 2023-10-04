@@ -1,0 +1,158 @@
+/* TODO : 자스에서 css 클래스이름 작명 어떻게 하면 좋은지 알아보고 적용  */
+.chatroomlist {
+  background-color: #1c478e;
+  text-align: center;
+  padding: 7px;
+  font-size: 21px;
+  border-radius: 10px;
+  color: white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: "crazy";
+}
+
+.typebutton {
+  background-color: #55b7eb;
+  border-radius: 10px;
+  height: 33px;
+  border: 0px;
+  color: white;
+  margin: 7px 3px;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: "crazy";
+}
+.typebutton:disabled {
+  background-color: #1c478e;
+  color: white;
+}
+
+.notdm {
+  width: 70%;
+  margin-right: 0;
+  margin-left: 1px;
+  font-size: 15px;
+}
+.dm {
+  float: right;
+  margin-right: 1px;
+  margin-left: 0;
+  width: 27%;
+}
+
+.list {
+  background-color: #1c478e;
+  border-radius: 10px;
+  height: 81vh;
+  bottom: 0;
+  padding: 7px 11px;
+  padding-right: 0px;
+  padding-bottom: 7px;
+  overflow-y: scroll;
+}
+.list::-webkit-scrollbar {
+  background-color: transparent;
+  width: 17px;
+}
+.list::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.783);
+  /* 스크롤바의 색상 */
+  background-clip: padding-box;
+  border: 4px solid transparent;
+  border-radius: 50px;
+}
+
+.roomclicked {
+  background-color: #1c478e;
+  border-radius: 10px;
+  height: 43vh;
+  bottom: 0;
+  padding: 7px 11px;
+  padding-right: 0px;
+  padding-bottom: 7px;
+  overflow-y: scroll;
+}
+.roomclicked::-webkit-scrollbar {
+  background-color: transparent;
+  width: 17px;
+}
+.roomclicked::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.783);
+  background-clip: padding-box;
+  border: 4px solid transparent;
+  border-radius: 50px;
+}
+
+.item {
+  font-family: "crazy";
+  display: flex;
+  align-items: center;
+  background-color: #67dbfb;
+  border-radius: 10px;
+  height: 50px;
+  border: 0px;
+  margin: 8px auto;
+  width: 100%;
+  color: black;
+  font-size: 18px;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clickeditem {
+  font-family: "crazy";
+  display: flex;
+  align-items: center;
+  background-color: #7b8aa9;
+  border-radius: 10px;
+  height: 50px;
+  border: 0px;
+  margin: 8px auto;
+  width: 100%;
+  color: rgba(255, 255, 255, 0.294);
+  font-size: 18px;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.roomidx {
+  display: inline-block;
+  width: 17%;
+  margin: auto;
+  font-size: 16px;
+  font-family: "crazy";
+  vertical-align: middle;
+  color: rgb(255, 221, 0);
+}
+.clickedroomidx {
+  display: inline-block;
+  width: 17%;
+  margin: auto;
+  font-size: 16px;
+  font-family: "crazy";
+  vertical-align: middle;
+  color: rgba(255, 255, 255, 0.294);
+}
+.owner {
+  width: 70%;
+  text-align: center;
+}
+.lock {
+  width: 13%;
+  float: right;
+}
+
+.add {
+  background-color: white;
+  border-radius: 10px;
+  height: 50px;
+  border: 0px;
+  width: 100%;
+  color: #67dbfb;
+  font-size: 24px;
+}

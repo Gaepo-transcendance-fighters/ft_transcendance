@@ -1,0 +1,64 @@
+@font-face {
+  font-family: "crazy";
+  src: url("../../../font/neodgm.ttf") format("truetype");
+}
+
+.prfontneo {
+  font-family: "crazy";
+}
+
+.prlock {
+  height: 37px;
+  width: 37px;
+  margin: auto;
+  padding: 10px;
+}
+
+/* 채팅방 눌렀을때 참여자 리스트 그대로 놥두는거 생각해보기 */
+.prxbutton {
+  background-color: #ef2922ea;
+  border-radius: 7px;
+  height: 23px;
+  width: 23px;
+  border: 0px;
+  color: white;
+  font-size: 17px;
+  float: right;
+  font-weight: bold;
+  margin: 9px;
+}
+
+.prboxcontainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 13px;
+}
+
+.prinput {
+  border: 0;
+  height: 23px;
+  padding: 3px;
+  margin-left: 17px;
+  border-radius: 4px;
+}
+
+.prsubmitbutton {
+  background-color: #2253b8;
+  border-radius: 7px;
+  height: 33px;
+  width: 77px;
+  border: 0px;
+  color: white;
+  font-family: "crazy";
+  font-size: 17px;
+  margin-right: 17px;
+  float: right;
+}
+
+.prfailmsg {
+  text-align: center;
+  padding: 3px;
+  color: #ffea2b;
+  height: 33px;
+}

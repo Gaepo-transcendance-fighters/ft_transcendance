@@ -1,0 +1,49 @@
+/* styles.module.css */
+.ready {
+  opacity: 0;
+}
+
+.moveAndFadeUp {
+  animation: moveAndFadeUp 2s ease-out forwards;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+}
+
+.moveAndFadeDown {
+  animation: moveAndFadeDown 2s ease-out forwards;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+}
+
+
+@keyframes moveAndFadeUp {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+  
+  100% {
+    transform: translateY(-250px);
+    opacity: 0;
+  }
+}
+
+@keyframes moveAndFadeDown {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+  
+  100% {
+    transform: translateY(250px);
+    opacity: 0;
+  }
+}

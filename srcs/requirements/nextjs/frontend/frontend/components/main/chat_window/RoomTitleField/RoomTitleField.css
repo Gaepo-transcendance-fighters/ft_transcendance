@@ -1,0 +1,54 @@
+.room_title_field {
+  background-color: #5290d3;
+  border-radius: 5px;
+  margin: 1% 2% 1% 2%;
+
+  display: flex;
+  justify-content: space-between;
+  height: 44px;
+}
+
+.room_title_field_left {
+  display: flex;
+  align-items: center;
+}
+
+.stack_box {
+  margin: 2%;
+  margin-right: 2%;
+}
+.room_id {
+  vertical-align: middle;
+  color: #f2f070;
+  text-shadow:
+    -1px 0px black,
+    0px 1px black,
+    1px 0px black,
+    0px -1px black;
+}
+
+.room_name {
+  font-size: x-large;
+  width: 40vw;
+  color: white;
+  text-shadow: 0px 0px 4px black;
+}
+
+.room_title_field_right {
+  align-items: center;
+  display: flex;
+  margin-top: 4.5px;
+}
+
+.room_type {
+  padding: 8px;
+}
+
+.room_setting {
+  padding-bottom: 5px;
+}
+
+.room_exit {
+  padding-right: 6px;
+  padding-bottom: 5px;
+}
