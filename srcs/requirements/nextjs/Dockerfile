@@ -14,8 +14,11 @@ RUN npm install
 # 애플리케이션 소스 코드를 복사합니다. (현재 디렉토리의 모든 파일을 복사합니다.)
 EXPOSE 3000
 
-# 컨테이너를 시작할 때 실행할 명령을 지정합니다.
-CMD [ "npm", "run", "dev" ]
+# 빌드 명령을 실행합니다.
+RUN npm run build
+
+# 서버를 시작합니다.
+CMD ["npx", "serve", "out"]
 
 # FROM debian:bullseye
 
