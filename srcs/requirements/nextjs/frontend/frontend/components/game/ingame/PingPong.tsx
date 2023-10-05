@@ -236,11 +236,26 @@ const PingPong = () => {
     authState.gameSocket.on("game_pause_score", (data: IGameEnd) => {
       setWaterbombup(images_up);
       setWaterbombdown(images_down);
-      console.log("on");
-      if (
-        data.gameStatus === EGameStatus.END ||
-        data.gameStatus === EGameStatus.JUDGE
-      ) {
+      if (data.gameStatus === EGameStatus.JUDGE) {
+        setIsFinish(true);
+        gameDispatch({ type: "A_SCORE", value: data.userScore1 });
+        gameDispatch({ type: "B_SCORE", value: data.userScore2 });
+        if (
+          data.userIdx1 ===
+          parseInt(secureLocalStorage.getItem("idx") as string)
+        ) {
+          if (data.userIdx1 === data.winnerIdx) setIsWin(true);
+          else setIsWin(false);
+        } else {
+          if (data.userIdx2 === data.winnerIdx) setIsWin(true);
+          else setIsWin(false);
+        }
+        setTimeout(() => {
+          setIsFinish(false);
+          router.replace("/gameresult");
+        }, 3000);
+
+      } else if (data.gameStatus === EGameStatus.END) {
         setIsFinish(true);
         gameDispatch({ type: "A_SCORE", value: data.userScore1 });
         gameDispatch({ type: "B_SCORE", value: data.userScore2 });
@@ -252,19 +267,13 @@ const PingPong = () => {
             setIsWin(true);
           } else if (data.userScore1 < data.userScore2) {
             setIsWin(false);
-          } else {
-            if (data.userIdx1 === data.winnerIdx) setIsWin(true);
-            else setIsWin(false);
-          }
+          } 
         } else {
           if (data.userScore1 > data.userScore2) {
             setIsWin(false);
           } else if (data.userScore1 < data.userScore2) {
             setIsWin(true);
-          } else {
-            if (data.userIdx2 === data.winnerIdx) setIsWin(true);
-            else setIsWin(false);
-          }
+          } 
         }
         setTimeout(() => {
           setIsFinish(false);
